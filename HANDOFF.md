@@ -5,7 +5,7 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction) and Phase 2's **Bills sub-project** (merged 2026-09-04 via [PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)).
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), and Phase 2's **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)) and **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)) sub-projects, both merged 2026-09-04.
 - **Next action:** brainstorm the next Phase 2 sub-project — see "Resuming work".
 
 **Branch policy (user's standing instruction, 2026-09-03): do not push directly to `master`.** Work on a feature branch, push that, open a PR, merge. Ask before pushing or merging.
@@ -14,19 +14,20 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 
 Kotlin, MVVM + Clean Architecture (data/domain/ui), Room (KSP) + Hilt (KSP), Jetpack Navigation Component with Safe Args + BottomNavigationView, DataBinding + ViewBinding.
 
-Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes). Bottom nav: Home / Bills / Wallet / Categories / Settings(placeholder).
+Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes), **Calendar** (month grid with per-day expense/income dots and a day-detail list). Bottom nav: Home / Bills / Wallet / Categories / Settings(placeholder); Calendar opens from an icon in Home's header, since the nav's five slots are full.
 
 `Transaction` carries nullable `payeeName`/`payeeRole`; Room is at **v2** with `fallbackToDestructiveMigration()` (no real users yet, so a schema change wipes and reseeds — that is intended).
 
-Verified end-to-end on the emulator. `testDebugUnitTest` 6/6 pass, `lintDebug` 0 errors / 44 warnings (all pre-existing categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, etc. Do not "fix" the pinned-dependency version warnings).
+Verified end-to-end on the emulator. `testDebugUnitTest` **18/18 pass**, `lintDebug` **0 errors** / 47 warnings (all pre-existing categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `UseCompoundDrawables`, etc. Do not "fix" the pinned-dependency version warnings).
+
+Still **no third-party dependencies beyond Phase 1's** — both sub-projects held that line. The charts trio is the first work likely to challenge it.
 
 ## Phase 2 — remaining work
 
-Phase 2 was decomposed into 4 independent sub-projects during brainstorming. **Bills is done.** The other three have **no design or plan yet** — each needs its own `superpowers:brainstorming` pass before planning:
+Phase 2 was decomposed into 4 independent sub-projects during brainstorming. **Bills and Calendar are done.** The remaining two have **no design or plan yet** — each needs its own `superpowers:brainstorming` pass before planning:
 
-- **Calendar**
-- **Charts trio** — Expense Chart, Budget Planner, Billing Reports
-- **Auth**
+- **Charts trio** — Expense Chart, Budget Planner, Billing Reports. Expect a real decision here: hand-drawn chart views versus accepting the project's first new dependency.
+- **Auth** — needs the user to decide what auth even means here, since there is no backend (a local-only gate versus a real service).
 
 Don't assume anything about their scope beyond the original PRD the user provided at the start of the project.
 
@@ -37,7 +38,7 @@ Don't assume anything about their scope beyond the original PRD the user provide
 3. `superpowers:writing-plans` → plan in `docs/superpowers/plans/`.
 4. Ask the user for execution mode: **inline** (execute in-session — what Bills used, and it worked well since the plan carried all the code) or **subagent-driven**. Then `superpowers:executing-plans` or `superpowers:subagent-driven-development`.
 
-Bills' spec and plan are good templates: [spec](docs/superpowers/specs/2026-09-03-bills-design.md), [plan](docs/superpowers/plans/2026-09-03-bills-implementation.md).
+Existing specs and plans are good templates — [Bills spec](docs/superpowers/specs/2026-09-03-bills-design.md) / [plan](docs/superpowers/plans/2026-09-03-bills-implementation.md), [Calendar spec](docs/superpowers/specs/2026-09-04-calendar-design.md) / [plan](docs/superpowers/plans/2026-09-04-calendar-implementation.md). The Calendar plan is the better model: every task compiles on its own, so each gets a real build check, whereas three of Bills' tasks only compiled as a set and had to be written blind.
 
 ## Environment setup — do this before touching code
 
@@ -60,6 +61,17 @@ Bills' spec and plan are good templates: [spec](docs/superpowers/specs/2026-09-0
 ### Polling the watcher correctly
 
 Reading `watch_build_status.txt` right after a batch of edits can catch a **mid-write build** — the watcher may have started before your last file landed. Wait for a `SUCCESS`/`FAILED`, then re-read ~10s later and only trust it if unchanged; if it moved back to `BUILDING`, keep waiting. Run the poll loop as a background Bash task and let the completion notification wake you.
+
+**The watcher can silently swallow an edit made while a build is running.** `watch_build.ps1` recomputes `$lastHash` *after* the build finishes, so a file written mid-build is folded into the new baseline and never triggers a rebuild — the settle-check above won't catch this, because the status genuinely is stable. The symptom is a compile error naming something you know you just fixed, often with a code-generating task reporting `UP-TO-DATE`. It cost a debugging detour during Calendar: a `nav_graph.xml` edit was swallowed, `generateSafeArgsDebug` stayed `UP-TO-DATE`, and the build failed on `Unresolved reference 'HomeFragmentDirections'`. **Remedy:** `touch` the files in question to force a fresh cycle. If a failure blames a file whose content on disk is provably correct, suspect this before debugging the code.
+
+**`watch_build.log` is append-only.** Grepping the whole file for `error:` surfaces *historical* failures from earlier sessions and reports them as if they were current — during Calendar it produced a confusing wall of `string/nav_graph` errors left over from the Bills work. Always slice from the last build marker first:
+
+```bash
+LAST=$(grep -n "=== Build triggered at" watch_build.log | tail -1 | cut -d: -f1)
+tail -n +"$LAST" watch_build.log | tr -d '\r' | sed -n '1,90p'
+```
+
+Read that slice raw rather than grepping it — the log wraps at the PowerShell console width, so error messages are split mid-word and a `grep` for the interesting part often misses the line that carries it.
 
 ## Known gotchas (read before writing new layouts/adapters)
 
