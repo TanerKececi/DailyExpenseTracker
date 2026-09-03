@@ -2,7 +2,7 @@
     <string name="app_name">DailyExpenseTracker</string>
 
     <string name="nav_home">Home</string>
-    <string name="nav_graph">Graph</string>
+    <string name="nav_bills">Bills</string>
     <string name="nav_wallet">Transactions</string>
     <string name="nav_categories">Category</string>
     <string name="nav_settings">Settings</string>
@@ -33,4 +33,15 @@
     <string name="add_transaction_error_title">Please enter a title</string>
     <string name="add_transaction_error_amount">Please enter a valid amount</string>
     <string name="add_transaction_error_category">Please select a category</string>
+
+    <string name="bills_tab_paid">Paid</string>
+    <string name="bills_tab_overdue">Overdue</string>
+    <string name="bills_tab_upcoming">Upcoming</string>
+    <string name="bills_search_hint">Search</string>
+
+    <string name="bill_detail_title">Schedule Bill</string>
+    <string name="bill_detail_decline">Decline</string>
+    <string name="bill_detail_approve">Approve</string>
+    <string name="bill_detail_scheduled_for">Scheduled for %1$s</string>
+    <string name="bill_detail_card">Card %1$s</string>
 </resources>

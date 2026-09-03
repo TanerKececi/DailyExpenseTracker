@@ -1,6 +1,7 @@
 package com.example.dailyexpensetracker.ui.wallet.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -11,7 +12,10 @@ import com.example.dailyexpensetracker.ui.common.util.CategoryIconMapper
 import com.example.dailyexpensetracker.ui.common.util.CurrencyFormatter
 import com.example.dailyexpensetracker.ui.common.util.DateFormatter
 
-class RecentTransactionAdapter : RecyclerView.Adapter<RecentTransactionAdapter.ViewHolder>() {
+/** Rows are inert unless [onClick] is supplied — Bills passes one to open the detail screen. */
+class RecentTransactionAdapter(
+    private val onClick: ((TransactionListItem) -> Unit)? = null
+) : RecyclerView.Adapter<RecentTransactionAdapter.ViewHolder>() {
 
     private var items: List<TransactionListItem> = emptyList()
 
@@ -27,7 +31,14 @@ class RecentTransactionAdapter : RecyclerView.Adapter<RecentTransactionAdapter.V
         return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position])
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = items[position]
+        holder.bind(item)
+        val callback = onClick
+        holder.itemView.setOnClickListener(
+            if (callback == null) null else View.OnClickListener { callback(item) }
+        )
+    }
 
     class ViewHolder(private val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: TransactionListItem) {
