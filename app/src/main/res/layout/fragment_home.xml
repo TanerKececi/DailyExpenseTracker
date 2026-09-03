@@ -18,25 +18,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/purple_primary"
-                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:padding="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/home_title"
-                    android:textColor="@color/purple_accent_light"
-                    android:textSize="14sp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvTodayBalance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/white"
-                    android:textSize="28sp"
-                    android:textStyle="bold"
-                    tools:text="$180.75" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_title"
+                        android:textColor="@color/purple_accent_light"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvTodayBalance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/white"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        tools:text="$180.75" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ivCalendar"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@string/calendar_title"
+                    android:src="@drawable/ic_calendar_24"
+                    app:tint="@color/white" />
             </LinearLayout>
 
             <androidx.cardview.widget.CardView

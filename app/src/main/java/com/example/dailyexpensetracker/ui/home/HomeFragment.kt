@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dailyexpensetracker.databinding.FragmentHomeBinding
 import com.example.dailyexpensetracker.ui.common.util.CurrencyFormatter
@@ -44,6 +45,10 @@ class HomeFragment : Fragment() {
 
         binding.rvMonthlyBudget.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvMonthlyBudget.adapter = monthlyBudgetAdapter
+
+        binding.ivCalendar.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToCalendarFragment())
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

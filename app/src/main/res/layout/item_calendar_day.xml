@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
+
+    <TextView
+        android:id="@+id/tvDay"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:background="@drawable/bg_circle"
+        android:backgroundTint="@android:color/transparent"
+        android:gravity="center"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        tools:text="15" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="8dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/vDotExpense"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/soft_red" />
+
+        <View
+            android:id="@+id/vDotIncome"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_marginStart="3dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/soft_green" />
+    </LinearLayout>
+
+</LinearLayout>

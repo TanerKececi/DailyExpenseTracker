@@ -12,6 +12,9 @@
     <color name="text_primary">#1A1A2E</color>
     <color name="text_secondary">#8D8D9A</color>
 
+    <!-- hairline separator; distinct from background_light_gray so it is actually visible on it -->
+    <color name="divider_light">#E9EAEE</color>
+
     <!-- default/fallback background for a category card before its real color is bound -->
     <color name="cat_grocery">#5A67F2</color>
 </resources>
