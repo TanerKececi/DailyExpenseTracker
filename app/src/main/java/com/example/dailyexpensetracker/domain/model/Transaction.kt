@@ -9,5 +9,7 @@ data class Transaction(
     val cardId: Long?,
     val type: TransactionType,
     val isScheduled: Boolean,
-    val status: TransactionStatus
+    val status: TransactionStatus,
+    val payeeName: String? = null,
+    val payeeRole: String? = null
 )
