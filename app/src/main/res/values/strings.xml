@@ -44,4 +44,17 @@
     <string name="bill_detail_approve">Approve</string>
     <string name="bill_detail_scheduled_for">Scheduled for %1$s</string>
     <string name="bill_detail_card">Card %1$s</string>
+
+    <string name="calendar_title">Calendar</string>
+    <string name="calendar_empty_day">No transactions on this day</string>
+    <string name="calendar_previous_month">Previous month</string>
+    <string name="calendar_next_month">Next month</string>
+    <string name="calendar_back">Back</string>
+    <string name="calendar_day_sun">S</string>
+    <string name="calendar_day_mon">M</string>
+    <string name="calendar_day_tue">T</string>
+    <string name="calendar_day_wed">W</string>
+    <string name="calendar_day_thu">T</string>
+    <string name="calendar_day_fri">F</string>
+    <string name="calendar_day_sat">S</string>
 </resources>
