@@ -69,8 +69,8 @@ object DatabaseSeeder {
             TransactionEntity(title = "Gas Station", amount = 450.0, date = daysAgo(5), categoryId = fuelId, cardId = 1, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
             TransactionEntity(title = "Monthly Salary", amount = 10500.0, date = daysAgo(6), categoryId = salaryId, cardId = 1, type = TransactionType.INCOME, status = TransactionStatus.PAID),
             TransactionEntity(title = "Grocery Restock", amount = 540.0, date = daysAgo(0), categoryId = groceryId, cardId = 2, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Pharmacy Refill", amount = 1250.65, date = daysAhead(3), categoryId = medicineId, cardId = 1, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.UPCOMING),
-            TransactionEntity(title = "Overdue Bill", amount = 320.0, date = daysAgo(2), categoryId = foodId, cardId = 2, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.OVERDUE)
+            TransactionEntity(title = "Pharmacy Refill", amount = 1250.65, date = daysAhead(3), categoryId = medicineId, cardId = 1, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.UPCOMING, payeeName = "City Pharmacy", payeeRole = "Pharmacy"),
+            TransactionEntity(title = "Overdue Bill", amount = 320.0, date = daysAgo(2), categoryId = foodId, cardId = 2, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.OVERDUE, payeeName = "Stephen Thomas", payeeRole = "House Owner")
         )
         transactionDao.insertAll(transactions)
     }
