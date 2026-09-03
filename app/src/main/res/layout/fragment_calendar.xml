@@ -130,7 +130,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:background="@color/background_light_gray" />
+            android:background="@color/divider_light" />
 
         <TextView
             android:id="@+id/tvEmptyDay"
