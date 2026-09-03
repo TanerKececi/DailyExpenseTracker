@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
     <color name="purple_primary">#5A32EA</color>
@@ -13,14 +12,6 @@
     <color name="text_primary">#1A1A2E</color>
     <color name="text_secondary">#8D8D9A</color>
 
-    <!-- category background tints used as defaults/fallbacks -->
+    <!-- default/fallback background for a category card before its real color is bound -->
     <color name="cat_grocery">#5A67F2</color>
-    <color name="cat_food">#F2994A</color>
-    <color name="cat_clothes">#B39DFB</color>
-    <color name="cat_hotel">#F2C94C</color>
-    <color name="cat_medicine">#FF7675</color>
-    <color name="cat_fuel">#2ED9A6</color>
-    <color name="cat_gifts">#56CCF2</color>
-    <color name="cat_travel">#7B61FF</color>
-    <color name="cat_kids">#EB5FBD</color>
 </resources>

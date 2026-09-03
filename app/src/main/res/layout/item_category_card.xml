@@ -22,7 +22,7 @@
             android:id="@+id/ivIcon"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:tint="@color/white"
+            app:tint="@color/white"
             tools:src="@drawable/ic_cat_grocery_24" />
 
         <TextView

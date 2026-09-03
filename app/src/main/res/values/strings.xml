@@ -7,8 +7,6 @@
     <string name="nav_categories">Category</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="placeholder_coming_soon">Coming soon in the next update</string>
-
     <string name="home_title">Today</string>
     <string name="home_march_savings">Monthly Savings</string>
     <string name="home_earned">Earned</string>
@@ -31,7 +29,6 @@
     <string name="add_transaction_title">Add Transaction</string>
     <string name="add_transaction_amount_hint">Amount</string>
     <string name="add_transaction_title_hint">Title</string>
-    <string name="add_transaction_date">Date</string>
     <string name="add_transaction_save">Save</string>
     <string name="add_transaction_error_title">Please enter a title</string>
     <string name="add_transaction_error_amount">Please enter a valid amount</string>
