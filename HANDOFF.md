@@ -4,54 +4,77 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 
 ## Where things stand
 
-- **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, branch `master`.
-- **Pushed to GitHub:** Phase 1 (full app foundation + Home/Wallet/Categories/Add-Transaction) and a lint-fix follow-up.
-- **Committed locally, not yet pushed:** the Bills sub-project spec (`docs/superpowers/specs/2026-09-03-bills-design.md`) and its implementation plan (`docs/superpowers/plans/2026-09-03-bills-implementation.md`). Run `git status`/`git log` to confirm current state — check whether these got pushed before you start; if `git status` shows "ahead of origin/master" by these 2 commits, push them first (ask the user, don't push silently).
-- **Not yet started:** actual implementation of the Bills plan. **This is the next action** — see "Resuming work" below.
+- **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction) and Phase 2's **Bills sub-project** (merged 2026-09-04 via [PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)).
+- **Next action:** brainstorm the next Phase 2 sub-project — see "Resuming work".
 
-## What's built (Phase 1 — shipped)
+**Branch policy (user's standing instruction, 2026-09-03): do not push directly to `master`.** Work on a feature branch, push that, open a PR, merge. Ask before pushing or merging.
 
-Kotlin, MVVM + Clean Architecture (data/domain/ui), Room (KSP) + Hilt (KSP), Jetpack Navigation Component + BottomNavigationView, DataBinding + ViewBinding. Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet). Bottom nav: Home / Graph(placeholder) / Wallet / Categories / Settings(placeholder). Verified end-to-end on an emulator, `testDebugUnitTest` + `lintDebug` clean.
+## What's built
 
-## Phase 2 plan (in progress)
+Kotlin, MVVM + Clean Architecture (data/domain/ui), Room (KSP) + Hilt (KSP), Jetpack Navigation Component with Safe Args + BottomNavigationView, DataBinding + ViewBinding.
 
-Phase 2 = the screens Phase 1 deferred: Bills+Detail, Calendar, 3 chart screens, Auth. Decomposed into 4 independent sub-projects during brainstorming; **only the first (Bills) has been speced and planned so far** — Calendar, Charts, and Auth haven't been brainstormed yet.
+Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes). Bottom nav: Home / Bills / Wallet / Categories / Settings(placeholder).
 
-**Bills sub-project** (spec: `docs/superpowers/specs/2026-09-03-bills-design.md`, plan: `docs/superpowers/plans/2026-09-03-bills-implementation.md`):
-- Bills list (Paid/Overdue/Upcoming tabs + live search) replaces the inert Graph bottom-nav tab.
-- Schedule Bill Detail screen (payee info, Approve→marks Paid, Decline→deletes).
-- Adds nullable `payeeName`/`payeeRole` to the existing `Transaction`, bumps Room to v2 with a destructive migration (no real users yet, so this is fine).
-- 7 tasks, each ending in a commit. Full code already written into the plan — no design decisions left, just execution.
+`Transaction` carries nullable `payeeName`/`payeeRole`; Room is at **v2** with `fallbackToDestructiveMigration()` (no real users yet, so a schema change wipes and reseeds — that is intended).
+
+Verified end-to-end on the emulator. `testDebugUnitTest` 6/6 pass, `lintDebug` 0 errors / 44 warnings (all pre-existing categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, etc. Do not "fix" the pinned-dependency version warnings).
+
+## Phase 2 — remaining work
+
+Phase 2 was decomposed into 4 independent sub-projects during brainstorming. **Bills is done.** The other three have **no design or plan yet** — each needs its own `superpowers:brainstorming` pass before planning:
+
+- **Calendar**
+- **Charts trio** — Expense Chart, Budget Planner, Billing Reports
+- **Auth**
+
+Don't assume anything about their scope beyond the original PRD the user provided at the start of the project.
 
 ### Resuming work
 
-1. Read `docs/superpowers/plans/2026-09-03-bills-implementation.md` in full.
-2. Ask the user which execution mode they want: **subagent-driven** (a fresh subagent per task, review between tasks — recommended) or **inline** (execute tasks directly in-session). This question was asked and not yet answered when this handoff was written.
-3. Invoke the matching skill: `superpowers:subagent-driven-development` or `superpowers:executing-plans`.
+1. Ask the user which sub-project to take next (or confirm the order above).
+2. `superpowers:brainstorming` → design doc in `docs/superpowers/specs/`.
+3. `superpowers:writing-plans` → plan in `docs/superpowers/plans/`.
+4. Ask the user for execution mode: **inline** (execute in-session — what Bills used, and it worked well since the plan carried all the code) or **subagent-driven**. Then `superpowers:executing-plans` or `superpowers:subagent-driven-development`.
 
-After Bills ships (built, verified, tested, linted, committed, pushed), the remaining Phase 2 sub-projects — Calendar, the charts trio (Expense Chart/Budget Planner/Billing Reports), Auth — still need their own brainstorming pass each (`superpowers:brainstorming`) before planning. None of their designs exist yet; don't assume anything about them beyond what's in the original PRD the user provided at the start of this project.
+Bills' spec and plan are good templates: [spec](docs/superpowers/specs/2026-09-03-bills-design.md), [plan](docs/superpowers/plans/2026-09-03-bills-implementation.md).
 
 ## Environment setup — do this before touching code
 
-**You (Claude) cannot run Gradle directly in this sandbox** — every invocation of `gradlew` fails with `Unable to establish loopback connection`, even with elevated sandbox settings. This is a hard limitation, not a permission prompt; don't waste turns retrying it. Full detail in project memory (`dailyexpensetracker-watch-build-workflow`), summary here:
+**You (Claude) cannot run Gradle in this environment at all.** Every `gradlew` invocation fails with `java.io.IOException: Unable to establish loopback connection` — including with `dangerouslyDisableSandbox: true` (confirmed again 2026-09-04). It is a machine-level restriction on Claude's process tree, not a permission prompt. Don't retry it. Full detail in project memory `dailyexpensetracker-watch-build-workflow`.
 
-1. **Check if `watch_build.ps1` already exists** at the repo root (`ls watch_build.ps1`). It's gitignored (dev-only, not part of the app), so a fresh clone won't have it — but this is the same machine/directory as before, so it's probably still there.
-   - If it exists: ask the user to run `powershell -ExecutionPolicy Bypass -File watch_build.ps1` in their own terminal once, then leave it running. It polls `app\src`, `gradle\`, and the root/app `build.gradle.kts`/`gradle.properties` every ~3s and auto-runs `gradlew installDebug` on change, writing `SUCCESS`/`FAILED <timestamp>` to `watch_build_status.txt` and full output to `watch_build.log`. You (Claude) poll `watch_build_status.txt` via `Read`/`Bash` — never ask the user to paste build output back, read the file yourself.
-   - If it's missing, recreate it — full script content is in git history (`git log --all --oneline -- watch_build.ps1` won't find it since it's gitignored and never committed; instead see the version embedded in this session's transcript, or reconstruct: a `while ($true)` loop hashing `LastWriteTime.Ticks` across the watched paths, running `.\gradlew.bat installDebug --console=plain` on change, writing status/log files as described above).
-2. `gradle.properties` already pins `org.gradle.java.home` to Android Studio's bundled JDK 21 and sets `ksp.useKSP2=false` — required, don't remove. See `dailyexpensetracker-toolchain-versions` memory for why (JDK 26 on PATH, Kotlin/KSP/Hilt version compatibility chain).
-3. For runtime verification, drive the emulator via `adb` directly (`C:/Users/Administrator/AppData/Local/Android/Sdk/platform-tools/adb.exe`) — this works fine from the sandbox, only Gradle/JVM-fork tooling is blocked. Use `uiautomator dump` for exact tap coordinates rather than guessing from screenshots — coordinates shift when the keyboard opens, and guessed taps have caused real mis-clicks in this project before.
+1. **`watch_build.ps1`** at the repo root (gitignored, dev-only) auto-builds on save. Ask the user to run it once in their own terminal and leave it running:
+   ```
+   powershell -ExecutionPolicy Bypass -File watch_build.ps1
+   ```
+   It polls `app\src`, `gradle\`, and the root/app `build.gradle.kts`/`gradle.properties` every ~3s, debounces 2s, then runs `gradlew installDebug`, writing `BUILDING`/`SUCCESS <ts>`/`FAILED <ts>` to `watch_build_status.txt` and full output to `watch_build.log`. **You poll `watch_build_status.txt` yourself** — never ask the user to paste build output.
+2. **The watcher does NOT run tests or lint.** `installDebug` never compiles the `test` source set, so a broken or non-compiling unit test still reports `SUCCESS`. `testDebugUnitTest` and `lintDebug` only ever run in the user's terminal. Ask **once**, at the end, and read the output file yourself:
+   ```
+   ./gradlew testDebugUnitTest lintDebug --console=plain > verify_output.txt 2>&1
+   ```
+   PowerShell's `>` writes UTF-16 — decode it (`iconv -f UTF-16`), or read the reports directly, which is more reliable: `app/build/test-results/testDebugUnitTest/*.xml` for pass/fail counts and `app/build/reports/lint-results-debug.txt` for the error/warning tally. Note that a re-run shows every task `UP-TO-DATE`, which is *not* evidence tests ran — check the reports' timestamps.
+3. **Tell the user not to stop the watcher to run that command** (use a second terminal). Ctrl+C'ing it silently swallowed a rebuild in the last session and nearly shipped an unverified change.
+4. `gradle.properties` pins `org.gradle.java.home` to Android Studio's bundled JDK 21 and sets `ksp.useKSP2=false` — required, don't remove. See memory `dailyexpensetracker-toolchain-versions`.
+5. Drive the emulator via `adb` directly (`C:/Users/Administrator/AppData/Local/Android/Sdk/platform-tools/adb.exe`) — this works fine. Use `uiautomator dump` for exact tap coordinates rather than guessing from screenshots; coordinates shift when the keyboard opens. `adb shell sleep N` works for waits (the Bash tool blocks foreground `sleep`).
+
+### Polling the watcher correctly
+
+Reading `watch_build_status.txt` right after a batch of edits can catch a **mid-write build** — the watcher may have started before your last file landed. Wait for a `SUCCESS`/`FAILED`, then re-read ~10s later and only trust it if unchanged; if it moved back to `BUILDING`, keep waiting. Run the poll loop as a background Bash task and let the completion notification wake you.
 
 ## Known gotchas (read before writing new layouts/adapters)
 
-- **Never name a child view `android:id="@+id/root"`** in any layout used with ViewBinding/DataBinding. It collides with the generated synthetic `binding.root` property and causes a very confusing `RecyclerView` crash (`ViewHolder views must not be attached when created`) that looks like a Fragment/Navigation timing bug but isn't. Burned a long debugging session on this in Phase 1. Full writeup: project memory `viewbinding-root-id-collision`.
-- RecyclerView adapters in this codebase are plain `RecyclerView.Adapter` with `submitList()` + `notifyDataSetChanged()`, not `ListAdapter`/`DiffUtil` — match this pattern.
-- `app:tint` (not `android:tint`) on ImageViews per AppCompat lint rules — and remember to declare `xmlns:app` on the layout root if it's not already there.
-- Claude's project memory files (`viewbinding-root-id-collision`, `dailyexpensetracker-toolchain-versions`, `dailyexpensetracker-watch-build-workflow`) should auto-load as background context in a new session for this project — if they don't seem to be present, read them directly from `C:\Users\Administrator\.claude\projects\C--Users-Administrator-AndroidStudioProjects-DailyExpenseTracker\memory\`.
+- **Never name a child view `android:id="@+id/root"`** in any layout used with ViewBinding/DataBinding. It collides with the generated `binding.root` and causes a confusing `RecyclerView` crash (`ViewHolder views must not be attached when created`). Memory: `viewbinding-root-id-collision`.
+- **A ViewModel outlives its fragment's view across navigation.** Navigating to a detail screen and back gives you a *fresh view* with a *retained ViewModel* — any widget with its own selection state (TabLayout, spinner) resets to index 0 while the ViewModel still holds the old value, and re-tapping the already-selected item fires no callback. Re-sync the widget from ViewModel state in `onViewCreated`. This bit Bills; see `BillsFragment.tabStatuses`.
+- **Material3 `TabLayout` paints its own surface background.** On a colored header it hides a white selected-tab label. Set `android:background="@android:color/transparent"`.
+- RecyclerView adapters here are plain `RecyclerView.Adapter` with `submitList()` + `notifyDataSetChanged()`, not `ListAdapter`/`DiffUtil` — match this. `RecentTransactionAdapter` takes an optional row-click callback and is reused by both Wallet and Bills; prefer extending it over writing a near-duplicate adapter.
+- `app:tint` (not `android:tint`) on ImageViews per AppCompat lint — declare `xmlns:app` on the layout root if absent.
+- For a non-autofillable text field (e.g. search), use `android:importantForAutofill="no"`, not a bogus `autofillHints` value.
+- Writing Kotlin/XML via Bash heredocs has repeatedly tripped the shell parser. Use the Write tool for source files.
+- Project memory files (`viewbinding-root-id-collision`, `dailyexpensetracker-toolchain-versions`, `dailyexpensetracker-watch-build-workflow`) should auto-load in a new session; if not, read them from `C:\Users\Administrator\.claude\projects\C--Users-Administrator-AndroidStudioProjects-DailyExpenseTracker\memory\`.
 
-## Verification checklist (matches Phase 1's process, reuse it)
+## Verification checklist (reuse it)
 
-1. Watcher-driven `installDebug` after every save.
-2. adb-driven walkthrough with screenshots + `logcat | grep "FATAL EXCEPTION"` after each meaningful change.
-3. `.\gradlew testDebugUnitTest lintDebug` once at the end of the plan (needs the user's terminal — ask them to run it, then read the output file yourself rather than asking them to paste it).
-4. Clean up scratch screenshots/dumps from the repo root before committing.
-5. Commit locally per the plan's task boundaries; push only after explicit user confirmation.
+1. Watcher-driven `installDebug` after every save; poll with the settle-check above.
+2. adb-driven walkthrough with screenshots + `logcat -d | grep "FATAL EXCEPTION"` after each meaningful change. Screenshots and `uiautomator` dumps go in the scratchpad, **not** the repo root.
+3. `testDebugUnitTest lintDebug` once at the end — one request to the user, then read the reports yourself.
+4. Commit per task boundary. Push the feature branch and open a PR only after explicit user confirmation.
