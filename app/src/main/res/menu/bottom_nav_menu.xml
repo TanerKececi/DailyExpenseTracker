@@ -5,9 +5,9 @@
         android:icon="@drawable/ic_home_24"
         android:title="@string/nav_home" />
     <item
-        android:id="@+id/placeholderGraphFragment"
-        android:icon="@drawable/ic_bar_chart_24"
-        android:title="@string/nav_graph" />
+        android:id="@+id/billsFragment"
+        android:icon="@drawable/ic_bills_24"
+        android:title="@string/nav_bills" />
     <item
         android:id="@+id/walletFragment"
         android:icon="@drawable/ic_wallet_24"

@@ -10,13 +10,21 @@
         android:label="@string/nav_home" />
 
     <fragment
-        android:id="@+id/placeholderGraphFragment"
-        android:name="com.example.dailyexpensetracker.ui.placeholder.PlaceholderFragment"
-        android:label="@string/nav_graph">
+        android:id="@+id/billsFragment"
+        android:name="com.example.dailyexpensetracker.ui.bills.BillsFragment"
+        android:label="@string/nav_bills">
+        <action
+            android:id="@+id/action_billsFragment_to_billDetailFragment"
+            app:destination="@id/billDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/billDetailFragment"
+        android:name="com.example.dailyexpensetracker.ui.billdetail.BillDetailFragment"
+        android:label="@string/bill_detail_title">
         <argument
-            android:name="arg_title"
-            app:argType="string"
-            android:defaultValue="Coming soon in the next update" />
+            android:name="transactionId"
+            app:argType="long" />
     </fragment>
 
     <fragment
