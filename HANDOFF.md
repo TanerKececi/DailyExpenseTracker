@@ -61,6 +61,17 @@ Bills' spec and plan are good templates: [spec](docs/superpowers/specs/2026-09-0
 
 Reading `watch_build_status.txt` right after a batch of edits can catch a **mid-write build** — the watcher may have started before your last file landed. Wait for a `SUCCESS`/`FAILED`, then re-read ~10s later and only trust it if unchanged; if it moved back to `BUILDING`, keep waiting. Run the poll loop as a background Bash task and let the completion notification wake you.
 
+**The watcher can silently swallow an edit made while a build is running.** `watch_build.ps1` recomputes `$lastHash` *after* the build finishes, so a file written mid-build is folded into the new baseline and never triggers a rebuild — the settle-check above won't catch this, because the status genuinely is stable. The symptom is a compile error naming something you know you just fixed, often with a code-generating task reporting `UP-TO-DATE`. It cost a debugging detour during Calendar: a `nav_graph.xml` edit was swallowed, `generateSafeArgsDebug` stayed `UP-TO-DATE`, and the build failed on `Unresolved reference 'HomeFragmentDirections'`. **Remedy:** `touch` the files in question to force a fresh cycle. If a failure blames a file whose content on disk is provably correct, suspect this before debugging the code.
+
+**`watch_build.log` is append-only.** Grepping the whole file for `error:` surfaces *historical* failures from earlier sessions and reports them as if they were current — during Calendar it produced a confusing wall of `string/nav_graph` errors left over from the Bills work. Always slice from the last build marker first:
+
+```bash
+LAST=$(grep -n "=== Build triggered at" watch_build.log | tail -1 | cut -d: -f1)
+tail -n +"$LAST" watch_build.log | tr -d '\r' | sed -n '1,90p'
+```
+
+Read that slice raw rather than grepping it — the log wraps at the PowerShell console width, so error messages are split mid-word and a `grep` for the interesting part often misses the line that carries it.
+
 ## Known gotchas (read before writing new layouts/adapters)
 
 - **Never name a child view `android:id="@+id/root"`** in any layout used with ViewBinding/DataBinding. It collides with the generated `binding.root` and causes a confusing `RecyclerView` crash (`ViewHolder views must not be attached when created`). Memory: `viewbinding-root-id-collision`.
