@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="260dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="12dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:id="@+id/cardContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/purple_primary"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wallet_current_balance"
+            android:textColor="@color/purple_accent_light"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="$10,450.00" />
+
+        <TextView
+            android:id="@+id/tvMasked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:letterSpacing="0.1"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            tools:text="**** 9324" />
+
+        <TextView
+            android:id="@+id/tvCardType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            tools:text="VISA" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

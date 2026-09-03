@@ -1,0 +1,21 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# dev-only helper (not part of the app)
+/watch_build.ps1
+/watch_build.log
+/watch_build_status.txt
+/emulator_log.txt

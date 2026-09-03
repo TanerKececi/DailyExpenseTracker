@@ -1,0 +1,27 @@
+<resources>
+    <style name="ShapeAppearance.App.Card" parent="ShapeAppearance.Material3.Corner.Large">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.SmallCard" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <style name="Widget.App.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/purple_primary</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
+    <style name="Widget.App.Fab" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/purple_primary</item>
+        <item name="tint">@color/white</item>
+    </style>
+</resources>

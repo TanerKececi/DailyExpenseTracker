@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.dailyexpensetracker.ui.home.HomeFragment"
+        android:label="@string/nav_home" />
+
+    <fragment
+        android:id="@+id/placeholderGraphFragment"
+        android:name="com.example.dailyexpensetracker.ui.placeholder.PlaceholderFragment"
+        android:label="@string/nav_graph">
+        <argument
+            android:name="arg_title"
+            app:argType="string"
+            android:defaultValue="Coming soon in the next update" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/walletFragment"
+        android:name="com.example.dailyexpensetracker.ui.wallet.WalletFragment"
+        android:label="@string/nav_wallet" />
+
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="com.example.dailyexpensetracker.ui.categories.CategoriesFragment"
+        android:label="@string/nav_categories" />
+
+    <fragment
+        android:id="@+id/placeholderSettingsFragment"
+        android:name="com.example.dailyexpensetracker.ui.placeholder.PlaceholderFragment"
+        android:label="@string/nav_settings">
+        <argument
+            android:name="arg_title"
+            app:argType="string"
+            android:defaultValue="Coming soon in the next update" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/addTransactionSheet"
+        android:name="com.example.dailyexpensetracker.ui.addtransaction.AddTransactionSheet"
+        android:label="@string/add_transaction_title" />
+
+</navigation>
