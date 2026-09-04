@@ -17,7 +17,7 @@
         android:icon="@drawable/ic_grid_24"
         android:title="@string/nav_categories" />
     <item
-        android:id="@+id/placeholderSettingsFragment"
-        android:icon="@drawable/ic_settings_24"
-        android:title="@string/nav_settings" />
+        android:id="@+id/reportsFragment"
+        android:icon="@drawable/ic_reports_24"
+        android:title="@string/nav_reports" />
 </menu>

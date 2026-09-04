@@ -47,14 +47,9 @@
         android:label="@string/nav_categories" />
 
     <fragment
-        android:id="@+id/placeholderSettingsFragment"
-        android:name="com.example.dailyexpensetracker.ui.placeholder.PlaceholderFragment"
-        android:label="@string/nav_settings">
-        <argument
-            android:name="arg_title"
-            app:argType="string"
-            android:defaultValue="Coming soon in the next update" />
-    </fragment>
+        android:id="@+id/reportsFragment"
+        android:name="com.example.dailyexpensetracker.ui.reports.ReportsFragment"
+        android:label="@string/nav_reports" />
 
     <dialog
         android:id="@+id/addTransactionSheet"
