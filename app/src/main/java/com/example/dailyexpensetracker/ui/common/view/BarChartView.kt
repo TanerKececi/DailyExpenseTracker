@@ -3,7 +3,6 @@ package com.example.dailyexpensetracker.ui.common.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -34,8 +33,6 @@ class BarChartView @JvmOverloads constructor(
         textSize = resources.displayMetrics.density * 10f
         textAlign = Paint.Align.CENTER
     }
-    private val textBounds = Rect()
-
     fun setBars(list: List<Bar>) {
         bars = list
         invalidate()
@@ -45,8 +42,11 @@ class BarChartView @JvmOverloads constructor(
         super.onDraw(canvas)
         if (bars.isEmpty()) return
 
-        labelPaint.getTextBounds("Sep", 0, 3, textBounds)
-        val labelHeight = textBounds.height() + resources.displayMetrics.density * 6f
+        // Reserve the full ascent-to-descent band, not just the glyph box: month labels like
+        // "Apr" and "Sep" have descenders, and drawing them on a baseline at the view's bottom
+        // edge clips their tails off.
+        val metrics = labelPaint.fontMetrics
+        val labelHeight = (metrics.descent - metrics.ascent) + resources.displayMetrics.density * 4f
         val plotHeight = height - labelHeight
         if (plotHeight <= 0f) return
 
@@ -71,7 +71,7 @@ class BarChartView @JvmOverloads constructor(
                 centerX + gap / 2f, plotHeight - incomeHeight,
                 centerX + barWidth + gap / 2f, plotHeight, incomePaint
             )
-            canvas.drawText(bar.label, centerX, height.toFloat(), labelPaint)
+            canvas.drawText(bar.label, centerX, height - metrics.descent, labelPaint)
         }
     }
 
