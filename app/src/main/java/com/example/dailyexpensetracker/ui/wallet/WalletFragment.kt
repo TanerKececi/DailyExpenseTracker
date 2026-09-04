@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dailyexpensetracker.R
 import com.example.dailyexpensetracker.databinding.FragmentWalletBinding
@@ -27,7 +28,11 @@ class WalletFragment : Fragment() {
     private val viewModel: WalletViewModel by viewModels()
 
     private val cardAdapter = CardCarouselAdapter()
-    private val transactionAdapter = RecentTransactionAdapter()
+    private val transactionAdapter = RecentTransactionAdapter { item ->
+        findNavController().navigate(
+            WalletFragmentDirections.actionWalletFragmentToAddTransactionSheet(item.transaction.id)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

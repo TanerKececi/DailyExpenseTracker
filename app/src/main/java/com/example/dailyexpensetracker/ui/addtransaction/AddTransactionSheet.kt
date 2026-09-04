@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.dailyexpensetracker.R
 import com.example.dailyexpensetracker.databinding.FragmentAddTransactionBinding
+import com.example.dailyexpensetracker.domain.model.Transaction
 import com.example.dailyexpensetracker.domain.model.TransactionType
 import com.example.dailyexpensetracker.ui.common.util.DateFormatter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -27,6 +30,9 @@ class AddTransactionSheet : BottomSheetDialogFragment() {
 
     private val categoryAdapter = CategoryPickerAdapter { category -> viewModel.setCategory(category.id) }
 
+    /** Guards against re-populating the fields over the user's own typing on later emissions. */
+    private var prefilled = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -41,6 +47,11 @@ class AddTransactionSheet : BottomSheetDialogFragment() {
 
         binding.rvCategoryPicker.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvCategoryPicker.adapter = categoryAdapter
+
+        if (viewModel.isEditing) {
+            binding.tvSheetTitle.setText(R.string.edit_transaction_title)
+            binding.btnDelete.visibility = View.VISIBLE
+        }
 
         binding.toggleType.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -57,12 +68,35 @@ class AddTransactionSheet : BottomSheetDialogFragment() {
             )
         }
 
+        binding.btnDelete.setOnClickListener { confirmDelete() }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.categories.collect {
-                        categoryAdapter.setSelectedId(null)
-                        categoryAdapter.submitList(it)
+                    viewModel.categories.collect { categories ->
+                        categoryAdapter.submitList(categories)
+                        // Re-apply from the ViewModel rather than clearing: in edit mode the
+                        // selection is already set before the category list arrives.
+                        val selectedId = viewModel.selectedCategoryId.value
+                        categoryAdapter.setSelectedId(selectedId)
+                        scrollToSelected(selectedId)
+                    }
+                }
+                launch {
+                    viewModel.selectedCategoryId.collect { id ->
+                        categoryAdapter.setSelectedId(id)
+                        // Also scroll here, not just in the categories collector: in edit mode the
+                        // category list usually arrives first and the selection lands afterwards,
+                        // once the transaction has loaded.
+                        scrollToSelected(id)
+                    }
+                }
+                launch {
+                    viewModel.original.collect { transaction ->
+                        if (transaction != null && !prefilled) {
+                            prefilled = true
+                            prefill(transaction)
+                        }
                     }
                 }
                 launch {
@@ -78,6 +112,34 @@ class AddTransactionSheet : BottomSheetDialogFragment() {
                 }
             }
         }
+    }
+
+    /**
+     * The picker scrolls horizontally, so a selection further along the list sits off-screen and
+     * an edit looks like no category was chosen.
+     */
+    private fun scrollToSelected(categoryId: Long?) {
+        if (categoryId == null) return
+        val index = viewModel.categories.value.indexOfFirst { it.id == categoryId }
+        if (index >= 0) binding.rvCategoryPicker.scrollToPosition(index)
+    }
+
+    private fun prefill(transaction: Transaction) {
+        binding.etTitle.setText(transaction.title)
+        binding.etAmount.setText(transaction.amount.toString())
+        binding.toggleType.check(
+            if (transaction.type == TransactionType.EXPENSE) binding.btnExpense.id else binding.btnIncome.id
+        )
+        // Must follow the toggle: checking it fires the listener, and setType clears the category.
+        viewModel.setCategory(transaction.categoryId)
+    }
+
+    private fun confirmDelete() {
+        AlertDialog.Builder(requireContext())
+            .setMessage(R.string.edit_transaction_delete_confirm)
+            .setNegativeButton(R.string.action_cancel, null)
+            .setPositiveButton(R.string.action_delete) { _, _ -> viewModel.delete() }
+            .show()
     }
 
     private fun showDatePicker() {

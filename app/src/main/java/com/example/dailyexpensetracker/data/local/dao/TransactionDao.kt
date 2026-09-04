@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.dailyexpensetracker.data.local.entity.TransactionEntity
 import com.example.dailyexpensetracker.domain.model.TransactionStatus
 import com.example.dailyexpensetracker.domain.model.TransactionType
@@ -34,6 +35,9 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE id = :id")
     suspend fun delete(id: Long)
+
+    @Update
+    suspend fun update(transaction: TransactionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(transaction: TransactionEntity): Long

@@ -27,8 +27,11 @@ class CalendarFragment : Fragment() {
 
     private val dayAdapter = CalendarDayAdapter { dayMillis -> viewModel.selectDay(dayMillis) }
 
-    // No click callback: day-detail rows are inert, unlike the Bills list.
-    private val transactionAdapter = RecentTransactionAdapter()
+    private val transactionAdapter = RecentTransactionAdapter { item ->
+        findNavController().navigate(
+            CalendarFragmentDirections.actionCalendarFragmentToAddTransactionSheet(item.transaction.id)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -72,4 +72,9 @@
     <string name="reports_six_month_totals">Last 6 months</string>
     <string name="reports_save">Save</string>
     <string name="reports_cancel">Cancel</string>
+
+    <string name="edit_transaction_title">Edit Transaction</string>
+    <string name="edit_transaction_delete_confirm">Delete this transaction? This can not be undone.</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
 </resources>

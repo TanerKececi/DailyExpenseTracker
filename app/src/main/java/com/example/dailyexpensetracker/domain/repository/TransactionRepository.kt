@@ -13,6 +13,7 @@ interface TransactionRepository {
     fun getByStatus(status: TransactionStatus): Flow<List<Transaction>>
     fun getById(id: Long): Flow<Transaction?>
     suspend fun add(transaction: Transaction)
+    suspend fun update(transaction: Transaction)
     suspend fun updateStatus(id: Long, status: TransactionStatus)
     suspend fun delete(id: Long)
 }
