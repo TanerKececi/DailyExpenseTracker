@@ -57,4 +57,20 @@
     <string name="calendar_day_thu">T</string>
     <string name="calendar_day_fri">F</string>
     <string name="calendar_day_sat">S</string>
+
+    <string name="nav_reports">Reports</string>
+    <string name="reports_tab_expense">Expenses</string>
+    <string name="reports_tab_budget">Budget</string>
+    <string name="reports_tab_billing">Billing</string>
+    <string name="reports_previous_month">Previous month</string>
+    <string name="reports_next_month">Next month</string>
+    <string name="reports_no_expenses">No expenses this month</string>
+    <string name="reports_no_budget_set">No budget set</string>
+    <string name="reports_total_spent">Total spent</string>
+    <string name="reports_spent_of_limit">%1$s of %2$s</string>
+    <string name="reports_edit_budget_title">Set monthly budget</string>
+    <string name="reports_edit_budget_hint">Amount (leave empty to clear)</string>
+    <string name="reports_six_month_totals">Last 6 months</string>
+    <string name="reports_save">Save</string>
+    <string name="reports_cancel">Cancel</string>
 </resources>
