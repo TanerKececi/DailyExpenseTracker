@@ -84,6 +84,49 @@
             android:textColor="@color/text_primary"
             tools:text="Sep 3, 2026" />
 
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/switchScheduled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/add_transaction_scheduled"
+            android:textColor="@color/text_primary" />
+
+        <LinearLayout
+            android:id="@+id/payeeFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/add_transaction_payee_name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPayeeName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/add_transaction_payee_role">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPayeeRole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCategoryPicker"
             android:layout_width="match_parent"

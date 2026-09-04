@@ -13,13 +13,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class BillsViewModel @Inject constructor(
-    getTransactionsByStatus: GetTransactionsByStatusUseCase,
+    private val getTransactionsByStatus: GetTransactionsByStatusUseCase,
     getCategories: GetCategoriesUseCase
 ) : ViewModel() {
 
@@ -29,7 +30,25 @@ class BillsViewModel @Inject constructor(
     /** Read by the fragment to re-select the right tab on a view that outlived its ViewModel state. */
     val status: TransactionStatus get() = _status.value
 
-    private val transactionsFlow = _status.flatMapLatest { getTransactionsByStatus(it) }
+    /**
+     * Overdue is derived from the due date rather than read from the stored status, so a bill
+     * slides from Upcoming into Overdue on its own. See [BillBuckets].
+     */
+    private val transactionsFlow = _status.flatMapLatest { status ->
+        when (status) {
+            TransactionStatus.PAID -> getTransactionsByStatus(TransactionStatus.PAID)
+
+            TransactionStatus.UPCOMING -> getTransactionsByStatus(TransactionStatus.UPCOMING)
+                .map { BillBuckets.upcoming(it, System.currentTimeMillis()) }
+
+            TransactionStatus.OVERDUE -> combine(
+                getTransactionsByStatus(TransactionStatus.OVERDUE),
+                getTransactionsByStatus(TransactionStatus.UPCOMING)
+            ) { storedOverdue, storedUpcoming ->
+                BillBuckets.overdue(storedOverdue, storedUpcoming, System.currentTimeMillis())
+            }
+        }
+    }
 
     val bills: StateFlow<List<TransactionListItem>> = combine(
         transactionsFlow, getCategories(), _query
