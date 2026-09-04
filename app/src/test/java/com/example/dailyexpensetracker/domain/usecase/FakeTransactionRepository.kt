@@ -37,6 +37,10 @@ class FakeTransactionRepository : TransactionRepository {
         state.value = state.value + transaction
     }
 
+    override suspend fun update(transaction: Transaction) {
+        state.value = state.value.map { if (it.id == transaction.id) transaction else it }
+    }
+
     override suspend fun updateStatus(id: Long, status: TransactionStatus) {
         state.value = state.value.map { if (it.id == id) it.copy(status = status) else it }
     }

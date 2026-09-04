@@ -16,7 +16,11 @@
     <fragment
         android:id="@+id/calendarFragment"
         android:name="com.example.dailyexpensetracker.ui.calendar.CalendarFragment"
-        android:label="@string/calendar_title" />
+        android:label="@string/calendar_title">
+        <action
+            android:id="@+id/action_calendarFragment_to_addTransactionSheet"
+            app:destination="@id/addTransactionSheet" />
+    </fragment>
 
     <fragment
         android:id="@+id/billsFragment"
@@ -39,7 +43,11 @@
     <fragment
         android:id="@+id/walletFragment"
         android:name="com.example.dailyexpensetracker.ui.wallet.WalletFragment"
-        android:label="@string/nav_wallet" />
+        android:label="@string/nav_wallet">
+        <action
+            android:id="@+id/action_walletFragment_to_addTransactionSheet"
+            app:destination="@id/addTransactionSheet" />
+    </fragment>
 
     <fragment
         android:id="@+id/categoriesFragment"
@@ -54,6 +62,11 @@
     <dialog
         android:id="@+id/addTransactionSheet"
         android:name="com.example.dailyexpensetracker.ui.addtransaction.AddTransactionSheet"
-        android:label="@string/add_transaction_title" />
+        android:label="@string/add_transaction_title">
+        <argument
+            android:name="transactionId"
+            app:argType="long"
+            android:defaultValue="0L" />
+    </dialog>
 
 </navigation>

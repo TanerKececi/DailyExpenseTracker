@@ -62,6 +62,10 @@ class TransactionRepositoryImpl @Inject constructor(
         dao.insert(transaction.toEntity())
     }
 
+    override suspend fun update(transaction: Transaction) {
+        dao.update(transaction.toEntity())
+    }
+
     override suspend fun updateStatus(id: Long, status: TransactionStatus) {
         dao.updateStatus(id, status)
     }
