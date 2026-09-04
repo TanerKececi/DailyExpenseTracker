@@ -5,8 +5,9 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), and Phase 2's **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)) and **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)) sub-projects, both merged 2026-09-04.
-- **Next action:** brainstorm the next Phase 2 sub-project — see "Resuming work".
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), and all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)) and **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)), all merged 2026-09-04.
+- **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
+- **Next action:** none outstanding. See "What's left" below for the open threads, none of which are committed work.
 
 **Branch policy (user's standing instruction, 2026-09-03): do not push directly to `master`.** Work on a feature branch, push that, open a PR, merge. Ask before pushing or merging.
 
@@ -14,31 +15,36 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 
 Kotlin, MVVM + Clean Architecture (data/domain/ui), Room (KSP) + Hilt (KSP), Jetpack Navigation Component with Safe Args + BottomNavigationView, DataBinding + ViewBinding.
 
-Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes), **Calendar** (month grid with per-day expense/income dots and a day-detail list). Bottom nav: Home / Bills / Wallet / Categories / Settings(placeholder); Calendar opens from an icon in Home's header, since the nav's five slots are full.
+Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes), **Calendar** (month grid with per-day expense/income dots and a day-detail list), **Reports** (three tabs: Expense Chart donut, Budget Planner with editable limits, Billing Reports six-month bars, sharing one month selector).
 
-`Transaction` carries nullable `payeeName`/`payeeRole`; Room is at **v2** with `fallbackToDestructiveMigration()` (no real users yet, so a schema change wipes and reseeds — that is intended).
+Bottom nav: Home / Bills / Wallet / Categories / **Reports**. Calendar opens from an icon in Home's header, since the nav's five slots are full.
 
-Verified end-to-end on the emulator. `testDebugUnitTest` **18/18 pass**, `lintDebug` **0 errors** / 47 warnings (all pre-existing categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `UseCompoundDrawables`, etc. Do not "fix" the pinned-dependency version warnings).
+`Transaction` carries nullable `payeeName`/`payeeRole`; Room is at **v2** with `fallbackToDestructiveMigration()` (no real users yet, so a schema change wipes and reseeds — that is intended). `Category.budgetLimit` is writable from Budget Planner.
 
-Still **no third-party dependencies beyond Phase 1's** — both sub-projects held that line. The charts trio is the first work likely to challenge it.
+Verified end-to-end on the emulator. `testDebugUnitTest` **40/40 pass** across 7 suites, `lintDebug` **0 errors** / 53 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
 
-## Phase 2 — remaining work
+Still **no third-party dependencies beyond Phase 1's**. The charts trio was the work most likely to break that, and it didn't: both charts are hand-drawn `View` subclasses in `ui/common/view/` whose geometry lives in pure, tested companion functions.
 
-Phase 2 was decomposed into 4 independent sub-projects during brainstorming. **Bills and Calendar are done.** The remaining two have **no design or plan yet** — each needs its own `superpowers:brainstorming` pass before planning:
+## What's left
 
-- **Charts trio** — Expense Chart, Budget Planner, Billing Reports. Expect a real decision here: hand-drawn chart views versus accepting the project's first new dependency.
-- **Auth** — needs the user to decide what auth even means here, since there is no backend (a local-only gate versus a real service).
+Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was dropped from scope by the user on 2026-09-04.** There is no committed work outstanding.
 
-Don't assume anything about their scope beyond the original PRD the user provided at the start of the project.
+Open threads, in the order they'd most likely matter — none of these has been agreed, so **ask before starting any of them**:
 
-### Resuming work
+- **Settings has no home.** Reports took its bottom-nav slot and `PlaceholderFragment` was deleted with it. A real Settings screen would need a new entry point — most likely a second icon in Home's header beside Calendar's.
+- **Nothing programmatically creates an UPCOMING bill.** They exist only via seed data; Add-Transaction always writes `PAID`. Recurring-bill scheduling was out of scope for Bills and remains unbuilt.
+- **The seeded database is the only data source.** There is no import, no backup, and a schema change wipes everything by design.
+- Smaller deferrals live in each spec's "Explicitly Out of Scope" section — chart interaction, custom date ranges, report export, locale-aware week start.
 
-1. Ask the user which sub-project to take next (or confirm the order above).
-2. `superpowers:brainstorming` → design doc in `docs/superpowers/specs/`.
-3. `superpowers:writing-plans` → plan in `docs/superpowers/plans/`.
-4. Ask the user for execution mode: **inline** (execute in-session — what Bills used, and it worked well since the plan carried all the code) or **subagent-driven**. Then `superpowers:executing-plans` or `superpowers:subagent-driven-development`.
+### If a new sub-project is agreed
 
-Existing specs and plans are good templates — [Bills spec](docs/superpowers/specs/2026-09-03-bills-design.md) / [plan](docs/superpowers/plans/2026-09-03-bills-implementation.md), [Calendar spec](docs/superpowers/specs/2026-09-04-calendar-design.md) / [plan](docs/superpowers/plans/2026-09-04-calendar-implementation.md). The Calendar plan is the better model: every task compiles on its own, so each gets a real build check, whereas three of Bills' tasks only compiled as a set and had to be written blind.
+1. `superpowers:brainstorming` → design doc in `docs/superpowers/specs/`.
+2. `superpowers:writing-plans` → plan in `docs/superpowers/plans/`.
+3. Ask the user for execution mode: **inline** (what all three shipped sub-projects used, and it worked well since the plans carried all their code) or **subagent-driven**. Then `superpowers:executing-plans` or `superpowers:subagent-driven-development`.
+
+Existing specs and plans are good templates — [Bills](docs/superpowers/specs/2026-09-03-bills-design.md) / [plan](docs/superpowers/plans/2026-09-03-bills-implementation.md), [Calendar](docs/superpowers/specs/2026-09-04-calendar-design.md) / [plan](docs/superpowers/plans/2026-09-04-calendar-implementation.md), [Reports](docs/superpowers/specs/2026-09-04-reports-design.md) / [plan](docs/superpowers/plans/2026-09-04-reports-implementation.md). The Calendar and Reports plans are the better models: every task compiles on its own, so each gets a real build check, whereas three of Bills' tasks only compiled as a set and had to be written blind.
+
+Note the ordering trick Reports used: the three tab fragments were built **before** the host that instantiates them, so no task ever referenced code that didn't exist yet.
 
 ## Environment setup — do this before touching code
 
@@ -78,6 +84,8 @@ Read that slice raw rather than grepping it — the log wraps at the PowerShell 
 - **Never name a child view `android:id="@+id/root"`** in any layout used with ViewBinding/DataBinding. It collides with the generated `binding.root` and causes a confusing `RecyclerView` crash (`ViewHolder views must not be attached when created`). Memory: `viewbinding-root-id-collision`.
 - **A ViewModel outlives its fragment's view across navigation.** Navigating to a detail screen and back gives you a *fresh view* with a *retained ViewModel* — any widget with its own selection state (TabLayout, spinner) resets to index 0 while the ViewModel still holds the old value, and re-tapping the already-selected item fires no callback. Re-sync the widget from ViewModel state in `onViewCreated`. This bit Bills; see `BillsFragment.tabStatuses`.
 - **Material3 `TabLayout` paints its own surface background.** On a colored header it hides a white selected-tab label. Set `android:background="@android:color/transparent"`.
+- **Never paint a foreground element in `@color/background_light_gray`.** It is the app's own screen background, so anything drawn in it is invisible. This has now shipped as a bug three separate times — Bills' selected tab label, the Calendar divider, and Budget Planner's progress tracks. Use `@color/divider_light` for hairlines and empty track fills. None of these were caught by a build or a test; only by looking at a screenshot.
+- **Canvas text needs its descender band reserved.** `drawText` with the baseline at a view's bottom edge clips the tails off "p", "g", "y" — `BarChartView`'s month labels lost theirs. Offset by `Paint.fontMetrics.descent` and reserve `descent - ascent` for the label strip.
 - RecyclerView adapters here are plain `RecyclerView.Adapter` with `submitList()` + `notifyDataSetChanged()`, not `ListAdapter`/`DiffUtil` — match this. `RecentTransactionAdapter` takes an optional row-click callback and is reused by both Wallet and Bills; prefer extending it over writing a near-duplicate adapter.
 - `app:tint` (not `android:tint`) on ImageViews per AppCompat lint — declare `xmlns:app` on the layout root if absent.
 - For a non-autofillable text field (e.g. search), use `android:importantForAutofill="no"`, not a bogus `autofillHints` value.
