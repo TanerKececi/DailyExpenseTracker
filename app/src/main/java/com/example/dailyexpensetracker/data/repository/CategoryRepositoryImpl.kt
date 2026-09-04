@@ -23,4 +23,8 @@ class CategoryRepositoryImpl @Inject constructor(
     override fun getAll(): Flow<List<Category>> = dao.getAll().map { list -> list.map { it.toDomain() } }
     override fun getByType(isExpense: Boolean): Flow<List<Category>> =
         dao.getByType(isExpense).map { list -> list.map { it.toDomain() } }
+
+    override suspend fun updateBudget(id: Long, limit: Double?) {
+        dao.updateBudget(id, limit)
+    }
 }

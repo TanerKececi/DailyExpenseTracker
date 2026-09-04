@@ -15,6 +15,9 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE isExpense = :isExpense ORDER BY name ASC")
     fun getByType(isExpense: Boolean): Flow<List<CategoryEntity>>
 
+    @Query("UPDATE categories SET budgetLimit = :limit WHERE id = :id")
+    suspend fun updateBudget(id: Long, limit: Double?)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(categories: List<CategoryEntity>)
 }
