@@ -3,6 +3,7 @@ package com.example.dailyexpensetracker.ui.calendar
 import com.example.dailyexpensetracker.domain.model.Transaction
 import com.example.dailyexpensetracker.domain.model.TransactionStatus
 import com.example.dailyexpensetracker.domain.model.TransactionType
+import com.example.dailyexpensetracker.ui.common.util.MonthRange
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -33,7 +34,7 @@ class CalendarMonthTest {
     // September 2026 starts on a Tuesday -> 2 leading blanks, 30 days.
     @Test
     fun `cellsFor aligns the first day under its weekday column`() {
-        val cells = CalendarMonth.cellsFor(CalendarMonth.monthStart(at(2026, Calendar.SEPTEMBER, 1)), emptyList())
+        val cells = CalendarMonth.cellsFor(MonthRange.monthStart(at(2026, Calendar.SEPTEMBER, 1)), emptyList())
 
         assertEquals(32, cells.size)
         assertEquals(listOf(null, null), cells.take(2).map { it.dayOfMonth })
@@ -44,7 +45,7 @@ class CalendarMonthTest {
     // January 2026 starts on a Thursday -> 4 leading blanks, 31 days.
     @Test
     fun `cellsFor handles a 31-day month`() {
-        val cells = CalendarMonth.cellsFor(CalendarMonth.monthStart(at(2026, Calendar.JANUARY, 15)), emptyList())
+        val cells = CalendarMonth.cellsFor(MonthRange.monthStart(at(2026, Calendar.JANUARY, 15)), emptyList())
 
         assertEquals(35, cells.size)
         assertEquals(4, cells.count { it.dayOfMonth == null })
@@ -54,7 +55,7 @@ class CalendarMonthTest {
     // February 2024 is a leap February starting on a Thursday -> 4 blanks, 29 days.
     @Test
     fun `cellsFor handles a leap February`() {
-        val cells = CalendarMonth.cellsFor(CalendarMonth.monthStart(at(2024, Calendar.FEBRUARY, 10)), emptyList())
+        val cells = CalendarMonth.cellsFor(MonthRange.monthStart(at(2024, Calendar.FEBRUARY, 10)), emptyList())
 
         assertEquals(33, cells.size)
         assertEquals(29, cells.last().dayOfMonth)
@@ -63,7 +64,7 @@ class CalendarMonthTest {
     // February 2026 is a non-leap February starting on a Sunday -> 0 blanks, 28 days.
     @Test
     fun `cellsFor handles a non-leap February`() {
-        val cells = CalendarMonth.cellsFor(CalendarMonth.monthStart(at(2026, Calendar.FEBRUARY, 10)), emptyList())
+        val cells = CalendarMonth.cellsFor(MonthRange.monthStart(at(2026, Calendar.FEBRUARY, 10)), emptyList())
 
         assertEquals(28, cells.size)
         assertEquals(1, cells.first().dayOfMonth)
@@ -72,7 +73,7 @@ class CalendarMonthTest {
 
     @Test
     fun `cellsFor sets expense and income flags independently`() {
-        val monthStart = CalendarMonth.monthStart(at(2026, Calendar.SEPTEMBER, 1))
+        val monthStart = MonthRange.monthStart(at(2026, Calendar.SEPTEMBER, 1))
         val cells = CalendarMonth.cellsFor(
             monthStart,
             listOf(
@@ -96,7 +97,7 @@ class CalendarMonthTest {
 
     @Test
     fun `cellsFor buckets a late-evening transaction on its local day`() {
-        val monthStart = CalendarMonth.monthStart(at(2026, Calendar.SEPTEMBER, 1))
+        val monthStart = MonthRange.monthStart(at(2026, Calendar.SEPTEMBER, 1))
         val cells = CalendarMonth.cellsFor(
             monthStart,
             listOf(tx(at(2026, Calendar.SEPTEMBER, 15, hour = 23, minute = 30), TransactionType.EXPENSE))
@@ -108,59 +109,12 @@ class CalendarMonthTest {
 
     @Test
     fun `cellsFor ignores transactions outside the month`() {
-        val monthStart = CalendarMonth.monthStart(at(2026, Calendar.SEPTEMBER, 1))
+        val monthStart = MonthRange.monthStart(at(2026, Calendar.SEPTEMBER, 1))
         val cells = CalendarMonth.cellsFor(
             monthStart,
             listOf(tx(at(2026, Calendar.AUGUST, 15), TransactionType.EXPENSE))
         )
 
         assertTrue(cells.none { it.hasExpense })
-    }
-
-    @Test
-    fun `sameDayInMonth clamps to the shorter target month`() {
-        val jan31 = at(2026, Calendar.JANUARY, 31)
-        val februaryStart = CalendarMonth.monthStart(at(2026, Calendar.FEBRUARY, 1))
-
-        val result = CalendarMonth.sameDayInMonth(februaryStart, jan31)
-
-        assertEquals(28, Calendar.getInstance().apply { timeInMillis = result }.get(Calendar.DAY_OF_MONTH))
-    }
-
-    @Test
-    fun `sameDayInMonth keeps the day when the target month is long enough`() {
-        val jan15 = at(2026, Calendar.JANUARY, 15)
-        val februaryStart = CalendarMonth.monthStart(at(2026, Calendar.FEBRUARY, 1))
-
-        val result = CalendarMonth.sameDayInMonth(februaryStart, jan15)
-
-        assertEquals(15, Calendar.getInstance().apply { timeInMillis = result }.get(Calendar.DAY_OF_MONTH))
-    }
-
-    @Test
-    fun `dayStart zeroes the time of day`() {
-        val result = CalendarMonth.dayStart(at(2026, Calendar.SEPTEMBER, 4, hour = 17, minute = 45))
-        val cal = Calendar.getInstance().apply { timeInMillis = result }
-
-        assertEquals(0, cal.get(Calendar.HOUR_OF_DAY))
-        assertEquals(0, cal.get(Calendar.MINUTE))
-        assertEquals(4, cal.get(Calendar.DAY_OF_MONTH))
-    }
-
-    @Test
-    fun `month navigation moves one month in each direction`() {
-        val septemberStart = CalendarMonth.monthStart(at(2026, Calendar.SEPTEMBER, 10))
-
-        val october = Calendar.getInstance().apply { timeInMillis = CalendarMonth.nextMonthStart(septemberStart) }
-        val august = Calendar.getInstance().apply { timeInMillis = CalendarMonth.previousMonthStart(septemberStart) }
-
-        assertEquals(Calendar.OCTOBER, october.get(Calendar.MONTH))
-        assertEquals(1, october.get(Calendar.DAY_OF_MONTH))
-        assertEquals(Calendar.AUGUST, august.get(Calendar.MONTH))
-    }
-
-    @Test
-    fun `label formats month and year`() {
-        assertEquals("September 2026", CalendarMonth.label(CalendarMonth.monthStart(at(2026, Calendar.SEPTEMBER, 4))))
     }
 }
