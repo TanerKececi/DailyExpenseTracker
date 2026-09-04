@@ -5,7 +5,6 @@
     <string name="nav_bills">Bills</string>
     <string name="nav_wallet">Transactions</string>
     <string name="nav_categories">Category</string>
-    <string name="nav_settings">Settings</string>
 
     <string name="home_title">Today</string>
     <string name="home_march_savings">Monthly Savings</string>
