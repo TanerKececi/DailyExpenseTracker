@@ -5,7 +5,7 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), and all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)) and **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)), all merged 2026-09-04.
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04.
 - **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
 - **Next action:** none outstanding. See "What's left" below for the open threads, none of which are committed work.
 
@@ -19,9 +19,13 @@ Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** 
 
 Bottom nav: Home / Bills / Wallet / Categories / **Reports**. Calendar opens from an icon in Home's header, since the nav's five slots are full.
 
+The Add-Transaction sheet is also the **editor**: tapping a row in Wallet or in the Calendar day list reopens it prefilled, with a Delete button behind a confirmation. It carries the loaded transaction's `cardId`, `isScheduled` and `status` through on save — do not "simplify" that away, or editing a bill silently converts it into an ordinary paid transaction. A **"Scheduled bill"** switch creates `UPCOMING` transactions with optional payee name/role.
+
 `Transaction` carries nullable `payeeName`/`payeeRole`; Room is at **v2** with `fallbackToDestructiveMigration()` (no real users yet, so a schema change wipes and reseeds — that is intended). `Category.budgetLimit` is writable from Budget Planner.
 
-Verified end-to-end on the emulator. `testDebugUnitTest` **40/40 pass** across 7 suites, `lintDebug` **0 errors** / 53 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
+**Overdue is derived, never stored.** `ui/bills/BillBuckets` treats any scheduled bill whose due date has passed as overdue, so bills move tabs on their own with no background job. A bill due *today* is not overdue. Don't reintroduce a stored-status approach — it goes stale the moment a due date passes.
+
+Verified end-to-end on the emulator. `testDebugUnitTest` **50/50 pass** across 8 suites, `lintDebug` **0 errors** / 54 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
 
 Still **no third-party dependencies beyond Phase 1's**. The charts trio was the work most likely to break that, and it didn't: both charts are hand-drawn `View` subclasses in `ui/common/view/` whose geometry lives in pure, tested companion functions.
 
@@ -29,11 +33,16 @@ Still **no third-party dependencies beyond Phase 1's**. The charts trio was the 
 
 Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was dropped from scope by the user on 2026-09-04.** There is no committed work outstanding.
 
+Two gaps this file used to list are now **closed** — edit/delete of transactions (#7) and creating scheduled bills (#8). Don't rebuild them.
+
 Open threads, in the order they'd most likely matter — none of these has been agreed, so **ask before starting any of them**:
 
-- **Settings has no home.** Reports took its bottom-nav slot and `PlaceholderFragment` was deleted with it. A real Settings screen would need a new entry point — most likely a second icon in Home's header beside Calendar's.
-- **Nothing programmatically creates an UPCOMING bill.** They exist only via seed data; Add-Transaction always writes `PAID`. Recurring-bill scheduling was out of scope for Bills and remains unbuilt.
-- **The seeded database is the only data source.** There is no import, no backup, and a schema change wipes everything by design.
+- **11 ViewModels, 0 direct tests.** This is the live thread and the one the user named as the scaling concern. All 50 tests cover use cases and pure objects; nothing tests a ViewModel. Every bug that shipped during Phase 2 lived in exactly that layer — the Bills `TabLayout` desyncing from its retained ViewModel, the category-selection race in the edit sheet, the field-clobbering trap on save — and every one was caught by a human looking at a screenshot, which does not scale.
+  - **Cheap route, no new dependency:** keep extracting decision logic into pure objects and test those. `ui/bills/BillBuckets`, `ui/reports/billing/MonthlyTotals`, `ui/common/util/MonthRange` and `ui/calendar/CalendarMonth` are the existing examples of the pattern.
+  - **Thorough route:** test the ViewModels directly by asserting on their `StateFlow`s. Catches the wiring bugs the pure-function route cannot, but needs **`kotlinx-coroutines-test`** — which would be this project's *first* new dependency after four sub-projects deliberately held that line. **That is the user's decision, not Claude's — ask, don't assume.**
+- **Settings has no home.** Reports took its bottom-nav slot and `PlaceholderFragment` was deleted with it. A real Settings screen would need a new entry point — most likely a second icon in Home's header beside Calendar's — and, more to the point, a decision about what actually goes in it.
+- **The seeded database is the only data source.** There is no import, no export and no backup, and a schema change wipes everything by design.
+- **9 adapters call `notifyDataSetChanged()`**, rebinding everything on any change. Invisible at current data volumes and *not* worth pre-emptively fixing; it would start to matter in the hundreds of rows. Data access itself is in good shape — every transaction query is bounded by date range or status, and nothing loads transactions unbounded.
 - Smaller deferrals live in each spec's "Explicitly Out of Scope" section — chart interaction, custom date ranges, report export, locale-aware week start.
 
 ### If a new sub-project is agreed
