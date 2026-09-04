@@ -61,10 +61,17 @@ class AddTransactionSheet : BottomSheetDialogFragment() {
 
         binding.tvDate.setOnClickListener { showDatePicker() }
 
+        binding.switchScheduled.setOnCheckedChangeListener { _, isChecked ->
+            binding.payeeFields.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
         binding.btnSave.setOnClickListener {
             viewModel.save(
-                binding.etTitle.text?.toString().orEmpty(),
-                binding.etAmount.text?.toString().orEmpty()
+                title = binding.etTitle.text?.toString().orEmpty(),
+                amountText = binding.etAmount.text?.toString().orEmpty(),
+                isScheduled = binding.switchScheduled.isChecked,
+                payeeName = binding.etPayeeName.text?.toString().orEmpty(),
+                payeeRole = binding.etPayeeRole.text?.toString().orEmpty()
             )
         }
 
@@ -127,6 +134,10 @@ class AddTransactionSheet : BottomSheetDialogFragment() {
     private fun prefill(transaction: Transaction) {
         binding.etTitle.setText(transaction.title)
         binding.etAmount.setText(transaction.amount.toString())
+        // Setting checked fires the listener, which reveals the payee fields.
+        binding.switchScheduled.isChecked = transaction.isScheduled
+        binding.etPayeeName.setText(transaction.payeeName.orEmpty())
+        binding.etPayeeRole.setText(transaction.payeeRole.orEmpty())
         binding.toggleType.check(
             if (transaction.type == TransactionType.EXPENSE) binding.btnExpense.id else binding.btnIncome.id
         )

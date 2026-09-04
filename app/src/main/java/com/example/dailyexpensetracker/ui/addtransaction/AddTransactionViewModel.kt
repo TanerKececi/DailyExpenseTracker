@@ -97,7 +97,13 @@ class AddTransactionViewModel @Inject constructor(
         _selectedCategoryId.value = categoryId
     }
 
-    fun save(title: String, amountText: String) {
+    fun save(
+        title: String,
+        amountText: String,
+        isScheduled: Boolean,
+        payeeName: String,
+        payeeRole: String
+    ) {
         viewModelScope.launch {
             val amount = amountText.toDoubleOrNull()
             val categoryId = _selectedCategoryId.value
@@ -114,17 +120,29 @@ class AddTransactionViewModel @Inject constructor(
                         date = _dateMillis.value,
                         categoryId = categoryId,
                         type = _type.value,
-                        // Carry through the fields this sheet doesn't edit. Defaulting them would
-                        // turn a scheduled bill into an ordinary paid transaction and drop its card.
+                        // cardId isn't editable here, so carry it through rather than dropping it.
                         cardId = existing?.cardId,
-                        isScheduled = existing?.isScheduled ?: false,
-                        status = existing?.status ?: TransactionStatus.PAID
+                        isScheduled = isScheduled,
+                        status = statusFor(isScheduled, existing),
+                        payeeName = payeeName.trim().takeIf { it.isNotBlank() },
+                        payeeRole = payeeRole.trim().takeIf { it.isNotBlank() }
                     )
                     if (existing != null) updateTransaction(transaction) else addTransaction(transaction)
                     _events.emit(AddTransactionEvent.Saved)
                 }
             }
         }
+    }
+
+    /**
+     * Turning the switch off marks a transaction paid. Turning it on schedules it — but an
+     * already-scheduled bill keeps whatever status it has, so approving a bill and then editing it
+     * doesn't quietly send it back to Upcoming.
+     */
+    private fun statusFor(isScheduled: Boolean, existing: Transaction?): TransactionStatus = when {
+        !isScheduled -> TransactionStatus.PAID
+        existing != null && existing.isScheduled -> existing.status
+        else -> TransactionStatus.UPCOMING
     }
 
     fun delete() {

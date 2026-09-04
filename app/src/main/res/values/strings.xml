@@ -77,4 +77,8 @@
     <string name="edit_transaction_delete_confirm">Delete this transaction? This can not be undone.</string>
     <string name="action_delete">Delete</string>
     <string name="action_cancel">Cancel</string>
+
+    <string name="add_transaction_scheduled">Scheduled bill</string>
+    <string name="add_transaction_payee_name">Payee name (optional)</string>
+    <string name="add_transaction_payee_role">Payee role (optional)</string>
 </resources>
