@@ -81,4 +81,18 @@
     <string name="add_transaction_scheduled">Scheduled bill</string>
     <string name="add_transaction_payee_name">Payee name (optional)</string>
     <string name="add_transaction_payee_role">Payee role (optional)</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_currency">Currency</string>
+    <string name="settings_week_start">First day of week</string>
+    <string name="settings_week_start_sunday">Sunday</string>
+    <string name="settings_week_start_monday">Monday</string>
+    <string name="settings_reset_data">Reset data</string>
+    <string name="settings_reset_data_summary">Delete everything and restore the sample data</string>
+    <string name="settings_reset_confirm_title">Reset all data?</string>
+    <string name="settings_reset_confirm_message">Every transaction, category and card is deleted and replaced with the original sample data. This cannot be undone.</string>
+    <string name="settings_reset_confirm_action">Reset</string>
+    <string name="settings_reset_done">Data reset</string>
+    <string name="settings_cancel">Cancel</string>
 </resources>
