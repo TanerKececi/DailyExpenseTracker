@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:background="@drawable/bg_rounded_card_16"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/surface"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="14dp"

@@ -18,15 +18,17 @@ attribute shows that only **one** colour is overloaded:
 |---|---|---|
 | `android:textColor` (on the purple header) | 19 | foreground on primary |
 | `app:tint` (header icons) | 16 | foreground on primary |
+| `app:tabIndicatorColor` / `app:tabSelectedTextColor` | 4 | foreground on primary |
 | `app:cardBackgroundColor` | 6 | **surface** |
 | `android:background` | 1 | **surface** |
+| `android:backgroundTint` | 2 | one **surface**, one foreground on primary |
 
 Every other colour has exactly one semantic role — `text_primary` is 25 `textColor` uses,
 `text_secondary` 20 muted foregrounds, `background_light_gray` 13 recessed grounds,
 `divider_light` 2 hairlines. Single-role colours need no renaming at all: overriding their
 *values* in `values-night/colors.xml` does the whole job with zero layout edits.
 
-So the work is roughly **26 reference edits**, one new file and one deleted file — not a
+So the work is roughly **27 reference edits**, one new file and one deleted file — not a
 sweeping refactor.
 
 **The purple header stays purple in dark mode.** That is a deliberate brand decision, it matches
@@ -37,11 +39,16 @@ brand palette"), and it is why the 35 white-on-purple references need no change.
 
 ### Split `white`
 
-`white` is the only name doing two jobs. Add a `surface` colour and repoint the **9** genuine
+`white` is the only name doing two jobs. Add a `surface` colour and repoint the **10** genuine
 surface uses:
 
 - 6 × `app:cardBackgroundColor="@color/white"` and 1 × `android:background="@color/white"` in layouts
 - `drawable/bg_rounded_card_16.xml` and `drawable/bg_rounded_card_24.xml` (`<solid android:color>`)
+- `fragment_bills.xml:62` — the search bar, a `LinearLayout` using `bg_rounded_card_16` **with
+  `android:backgroundTint` overriding the drawable's solid colour**. Retinting the drawable alone
+  does not reach it. This is the only `backgroundTint` that is a surface; the other one
+  (`fragment_categories.xml:41`, the selected toggle pill) sits inside the purple header and
+  correctly stays `white`.
 
 The remaining uses stay `white` because they are foreground on the unchanged purple header:
 19 `textColor`, 16 `app:tint`, `colorOnPrimary` in `themes.xml`, the `Widget.App.Fab` tint in

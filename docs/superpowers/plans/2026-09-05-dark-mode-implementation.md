@@ -67,12 +67,12 @@ sed -i 's|<solid android:color="@color/white" />|<solid android:color="@color/su
 
 ```bash
 cd app/src/main/res
-echo "surface refs (expect 9):"; grep -roh "@color/surface" . | wc -l
+echo "surface refs (expect 10):"; grep -roh "@color/surface" . | wc -l
 echo "remaining white by attribute (expect textColor 19, tint 16, and nothing else):"
 grep -rohE '[a-zA-Z:]+="@color/white"' layout/ | sort | uniq -c
 ```
 
-Expected: 9 `surface` references; remaining `white` is only `android:textColor` (19) and `app:tint` (16). **If any `cardBackgroundColor` or `android:background` still says `white`, you missed one** — that card will stay white in dark mode.
+Expected: 10 `surface` references; remaining `white` is only `android:textColor` (19) and `app:tint` (16). **If any `cardBackgroundColor` or `android:background` still says `white`, you missed one** — that card will stay white in dark mode.
 
 - [ ] **Step 4: Build and confirm nothing moved**
 

@@ -2,6 +2,10 @@
 <resources>
     <color name="white">#FFFFFFFF</color>
 
+    <!-- Card and sheet background. Split out of @color/white, which is also the foreground on
+         the purple header - those two roles need opposite values in dark mode. -->
+    <color name="surface">#FFFFFF</color>
+
     <color name="purple_primary">#5A32EA</color>
     <color name="purple_primary_variant">#6C5CE7</color>
     <color name="purple_accent_light">#A29BFE</color>
