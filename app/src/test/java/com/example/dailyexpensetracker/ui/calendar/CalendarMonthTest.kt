@@ -117,4 +117,55 @@ class CalendarMonthTest {
 
         assertTrue(cells.none { it.hasExpense })
     }
+
+    // 1 March 2026 falls on a Sunday; 1 June 2026 falls on a Monday.
+
+    @Test
+    fun `a Sunday-start month needs no leading blanks on a Sunday week`() {
+        val marchStart = MonthRange.monthStart(at(2026, Calendar.MARCH, 1))
+
+        val cells = CalendarMonth.cellsFor(marchStart, emptyList(), Calendar.SUNDAY)
+
+        assertEquals(1, cells.first().dayOfMonth)
+    }
+
+    @Test
+    fun `a Sunday-start month needs six leading blanks on a Monday week`() {
+        val marchStart = MonthRange.monthStart(at(2026, Calendar.MARCH, 1))
+
+        val cells = CalendarMonth.cellsFor(marchStart, emptyList(), Calendar.MONDAY)
+
+        assertEquals(6, cells.count { it.dayOfMonth == null })
+        assertEquals(1, cells[6].dayOfMonth)
+    }
+
+    @Test
+    fun `a Monday-start month needs no leading blanks on a Monday week`() {
+        val juneStart = MonthRange.monthStart(at(2026, Calendar.JUNE, 1))
+
+        val cells = CalendarMonth.cellsFor(juneStart, emptyList(), Calendar.MONDAY)
+
+        assertEquals(1, cells.first().dayOfMonth)
+    }
+
+    @Test
+    fun `week start does not change how many real days the month has`() {
+        val marchStart = MonthRange.monthStart(at(2026, Calendar.MARCH, 1))
+
+        val sunday = CalendarMonth.cellsFor(marchStart, emptyList(), Calendar.SUNDAY)
+        val monday = CalendarMonth.cellsFor(marchStart, emptyList(), Calendar.MONDAY)
+
+        assertEquals(31, sunday.count { it.dayOfMonth != null })
+        assertEquals(31, monday.count { it.dayOfMonth != null })
+    }
+
+    @Test
+    fun `the default week start is Sunday`() {
+        val marchStart = MonthRange.monthStart(at(2026, Calendar.MARCH, 1))
+
+        assertEquals(
+            CalendarMonth.cellsFor(marchStart, emptyList(), Calendar.SUNDAY),
+            CalendarMonth.cellsFor(marchStart, emptyList())
+        )
+    }
 }

@@ -16,8 +16,9 @@ data class DayCell(
 /**
  * Builds the calendar month grid. Month arithmetic lives in [MonthRange], which Reports shares.
  *
- * ponytail: the week is fixed to start on Sunday so it stays in sync with the static weekday
- * header row; switch to Calendar.firstDayOfWeek if locale-aware week starts are ever needed.
+ * The week start is supplied by the caller (Settings owns it) and defaults to Sunday. Whatever is
+ * passed here must match the order the fragment paints its weekday header in, or the grid and its
+ * labels disagree — which looks exactly like an off-by-one in the blank count below.
  */
 object CalendarMonth {
 
@@ -26,9 +27,15 @@ object CalendarMonth {
      * month, each flagged by whether any of [transactions] that day was an expense and/or income.
      * Transactions outside the month are ignored. No trailing blanks — the grid just ends.
      */
-    fun cellsFor(monthStartMillis: Long, transactions: List<Transaction>): List<DayCell> {
+    fun cellsFor(
+        monthStartMillis: Long,
+        transactions: List<Transaction>,
+        weekStart: Int = Calendar.SUNDAY
+    ): List<DayCell> {
         val month = MonthRange.calendarAt(monthStartMillis)
-        val leadingBlanks = month.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+        // The `+ 7) % 7` is what puts a Sunday in the last column of a Monday-start week rather
+        // than producing -1.
+        val leadingBlanks = (month.get(Calendar.DAY_OF_WEEK) - weekStart + 7) % 7
         val daysInMonth = month.getActualMaximum(Calendar.DAY_OF_MONTH)
 
         val expenseDays = mutableSetOf<Int>()
