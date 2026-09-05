@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dailyexpensetracker.domain.usecase.GetCategoriesUseCase
 import com.example.dailyexpensetracker.domain.usecase.GetTransactionsForPeriodUseCase
 import com.example.dailyexpensetracker.ui.common.util.MonthRange
+import com.example.dailyexpensetracker.ui.settings.SettingsStore
 import com.example.dailyexpensetracker.ui.wallet.adapter.TransactionListItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +28,8 @@ data class CalendarUiState(
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     getTransactionsForPeriod: GetTransactionsForPeriodUseCase,
-    getCategories: GetCategoriesUseCase
+    getCategories: GetCategoriesUseCase,
+    private val settingsStore: SettingsStore
 ) : ViewModel() {
 
     private val today = MonthRange.dayStart(System.currentTimeMillis())
@@ -46,7 +48,7 @@ class CalendarViewModel @Inject constructor(
         val categoryById = categories.associateBy { it.id }
         CalendarUiState(
             monthLabel = MonthRange.label(monthStart),
-            cells = CalendarMonth.cellsFor(monthStart, transactions),
+            cells = CalendarMonth.cellsFor(monthStart, transactions, settingsStore.weekStart),
             selectedDayMillis = selectedDay,
             dayItems = transactions
                 .filter { MonthRange.dayStart(it.date) == selectedDay }
