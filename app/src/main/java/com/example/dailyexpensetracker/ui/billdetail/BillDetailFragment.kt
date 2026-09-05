@@ -58,7 +58,7 @@ class BillDetailFragment : Fragment() {
                 viewModel.uiState.collect { state ->
                     val tx = state.transaction ?: return@collect
                     val sign = if (tx.type == TransactionType.EXPENSE) "-" else "+"
-                    binding.tvAmount.text = "$sign${CurrencyFormatter.format(tx.amount)} USD"
+                    binding.tvAmount.text = "$sign${CurrencyFormatter.format(tx.amount)}"
                     binding.tvTitle.text = tx.title
                     binding.tvScheduledFor.text = getString(
                         R.string.bill_detail_scheduled_for,
