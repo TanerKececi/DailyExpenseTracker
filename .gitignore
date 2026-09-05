@@ -19,3 +19,6 @@ local.properties
 /watch_build.log
 /watch_build_status.txt
 /emulator_log.txt
+# Gradle console output from the manual verification runs (see HANDOFF.md)
+/verify_output.txt
+/install_output.txt
