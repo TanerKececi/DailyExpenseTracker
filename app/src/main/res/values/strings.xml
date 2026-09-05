@@ -83,6 +83,10 @@
     <string name="add_transaction_payee_role">Payee role (optional)</string>
 
     <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_appearance_system">Follow system</string>
+    <string name="settings_appearance_light">Light</string>
+    <string name="settings_appearance_dark">Dark</string>
     <string name="settings_back">Back</string>
     <string name="settings_currency">Currency</string>
     <string name="settings_week_start">First day of week</string>

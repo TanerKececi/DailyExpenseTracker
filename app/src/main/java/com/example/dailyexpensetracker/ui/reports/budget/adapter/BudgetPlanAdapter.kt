@@ -62,9 +62,9 @@ class BudgetPlanAdapter(
             // setIndicatorColor/trackColor are LinearProgressIndicator's own API; it does not
             // expose trackTintList.
             binding.progressBudget.setIndicatorColor(ContextCompat.getColor(context, colorRes))
-            // divider_light, not background_light_gray — the latter is the screen's own
+            // divider, not background — the latter is the screen's own
             // background, so an empty or part-filled track would be invisible against it.
-            binding.progressBudget.trackColor = ContextCompat.getColor(context, R.color.divider_light)
+            binding.progressBudget.trackColor = ContextCompat.getColor(context, R.color.divider)
         }
     }
 }

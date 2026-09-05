@@ -2,18 +2,23 @@
 <resources>
     <color name="white">#FFFFFFFF</color>
 
+    <!-- Card and sheet background. Split out of @color/white, which is also the foreground on
+         the purple header - those two roles need opposite values in dark mode. -->
+    <color name="surface">#FFFFFF</color>
+
     <color name="purple_primary">#5A32EA</color>
     <color name="purple_primary_variant">#6C5CE7</color>
     <color name="purple_accent_light">#A29BFE</color>
     <color name="soft_red">#FF7675</color>
     <color name="soft_green">#55E6C1</color>
     <color name="soft_blue">#74B9FF</color>
-    <color name="background_light_gray">#F8F9FA</color>
+    <color name="background">#F8F9FA</color>
     <color name="text_primary">#1A1A2E</color>
     <color name="text_secondary">#8D8D9A</color>
 
-    <!-- hairline separator; distinct from background_light_gray so it is actually visible on it -->
-    <color name="divider_light">#E9EAEE</color>
+    <!-- hairline separators and empty progress tracks; deliberately distinct from @color/background
+         so it stays visible against the screen's own ground -->
+    <color name="divider">#E9EAEE</color>
 
     <!-- default/fallback background for a category card before its real color is bound -->
     <color name="cat_grocery">#5A67F2</color>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light_gray"
+    android:background="@color/background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp">
 
@@ -51,6 +51,34 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="4dp">
+
+                <LinearLayout
+                    android:id="@+id/rowAppearance"
+                    style="@style/SettingsRow">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/settings_appearance"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/tvAppearanceValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="15sp"
+                        tools:text="Follow system" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@color/divider" />
 
                 <LinearLayout
                     android:id="@+id/rowCurrency"
@@ -78,7 +106,7 @@
                     android:layout_height="1dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@color/divider_light" />
+                    android:background="@color/divider" />
 
                 <LinearLayout
                     android:id="@+id/rowWeekStart"
@@ -109,7 +137,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@color/white"
+            app:cardBackgroundColor="@color/surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp">
 

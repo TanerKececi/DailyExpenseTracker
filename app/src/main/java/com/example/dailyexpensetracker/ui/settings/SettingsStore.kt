@@ -2,6 +2,7 @@ package com.example.dailyexpensetracker.ui.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.dailyexpensetracker.ui.common.util.CurrencyFormatter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Calendar
@@ -21,9 +22,16 @@ interface SettingsStore {
     var currencySymbol: String
     var weekStart: Int
 
+    /**
+     * One of the `AppCompatDelegate.MODE_NIGHT_*` constants. Unlike the other two settings this one
+     * takes effect immediately, because `setDefaultNightMode` recreates the running activity.
+     */
+    var nightMode: Int
+
     companion object {
         val SUPPORTED_SYMBOLS = listOf("$", "€", "£", "₺", "¥")
         const val DEFAULT_WEEK_START = Calendar.SUNDAY
+        const val DEFAULT_NIGHT_MODE = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
 }
 
@@ -44,8 +52,13 @@ class SharedPreferencesSettingsStore @Inject constructor(
         get() = prefs.getInt(KEY_WEEK_START, SettingsStore.DEFAULT_WEEK_START)
         set(value) = prefs.edit().putInt(KEY_WEEK_START, value).apply()
 
+    override var nightMode: Int
+        get() = prefs.getInt(KEY_NIGHT_MODE, SettingsStore.DEFAULT_NIGHT_MODE)
+        set(value) = prefs.edit().putInt(KEY_NIGHT_MODE, value).apply()
+
     private companion object {
         const val KEY_CURRENCY_SYMBOL = "currency_symbol"
         const val KEY_WEEK_START = "week_start"
+        const val KEY_NIGHT_MODE = "night_mode"
     }
 }

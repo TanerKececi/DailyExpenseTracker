@@ -2,6 +2,7 @@ package com.example.dailyexpensetracker.ui.settings
 
 import android.app.AlertDialog
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,6 +39,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.ivBack.setOnClickListener { findNavController().navigateUp() }
+        binding.rowAppearance.setOnClickListener { showAppearanceDialog() }
         binding.rowCurrency.setOnClickListener { showCurrencyDialog() }
         binding.rowWeekStart.setOnClickListener { showWeekStartDialog() }
         binding.rowResetData.setOnClickListener { showResetDialog() }
@@ -45,11 +47,42 @@ class SettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
+                    binding.tvAppearanceValue.setText(appearanceLabel(state.nightMode))
                     binding.tvCurrencyValue.text = state.currencySymbol
                     binding.tvWeekStartValue.setText(weekStartLabel(state.weekStart))
                 }
             }
         }
+    }
+
+    private fun appearanceLabel(nightMode: Int) = when (nightMode) {
+        AppCompatDelegate.MODE_NIGHT_NO -> R.string.settings_appearance_light
+        AppCompatDelegate.MODE_NIGHT_YES -> R.string.settings_appearance_dark
+        else -> R.string.settings_appearance_system
+    }
+
+    private fun showAppearanceDialog() {
+        val labels = arrayOf(
+            getString(R.string.settings_appearance_system),
+            getString(R.string.settings_appearance_light),
+            getString(R.string.settings_appearance_dark)
+        )
+        val values = intArrayOf(
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            AppCompatDelegate.MODE_NIGHT_NO,
+            AppCompatDelegate.MODE_NIGHT_YES
+        )
+        val checked = values.indexOf(viewModel.uiState.value.nightMode).coerceAtLeast(0)
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.settings_appearance)
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                viewModel.setNightMode(values[which])
+                dialog.dismiss()
+                // Recreates the activity, so this fragment dies here - persist first, apply second.
+                AppCompatDelegate.setDefaultNightMode(values[which])
+            }
+            .setNegativeButton(R.string.settings_cancel, null)
+            .show()
     }
 
     private fun weekStartLabel(weekStart: Int) =

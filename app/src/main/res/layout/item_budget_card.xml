@@ -5,7 +5,7 @@
     android:layout_width="200dp"
     android:layout_height="wrap_content"
     android:layout_marginEnd="12dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/surface"
     app:cardCornerRadius="16dp"
     app:cardElevation="1dp">
 
@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             app:indicatorColor="@color/soft_red"
-            app:trackColor="@color/background_light_gray"
+            app:trackColor="@color/background"
             app:trackCornerRadius="4dp"
             tools:progress="50" />
 

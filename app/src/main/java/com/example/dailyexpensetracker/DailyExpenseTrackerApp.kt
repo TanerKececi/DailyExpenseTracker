@@ -1,6 +1,7 @@
 package com.example.dailyexpensetracker
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.dailyexpensetracker.ui.common.util.CurrencyFormatter
 import com.example.dailyexpensetracker.ui.settings.SettingsStore
 import dagger.hilt.android.HiltAndroidApp
@@ -17,5 +18,6 @@ class DailyExpenseTrackerApp : Application() {
         // The formatter is an object read by DI-less adapters, so the stored symbol is pushed into
         // it once here rather than plumbed through every call site.
         CurrencyFormatter.symbol = settingsStore.currencySymbol
+        AppCompatDelegate.setDefaultNightMode(settingsStore.nightMode)
     }
 }
