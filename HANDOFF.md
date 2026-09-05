@@ -5,7 +5,7 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04.
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), merged 2026-09-05.
 - **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
 - **Next action:** none outstanding. See "What's left" below for the open threads, none of which are committed work.
 
@@ -25,21 +25,29 @@ The Add-Transaction sheet is also the **editor**: tapping a row in Wallet or in 
 
 **Overdue is derived, never stored.** `ui/bills/BillBuckets` treats any scheduled bill whose due date has passed as overdue, so bills move tabs on their own with no background job. A bill due *today* is not overdue. Don't reintroduce a stored-status approach — it goes stale the moment a due date passes.
 
-Verified end-to-end on the emulator. `testDebugUnitTest` **50/50 pass** across 8 suites, `lintDebug` **0 errors** / 54 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
+Verified end-to-end on the emulator. `testDebugUnitTest` **105/105 pass** across 16 suites, `lintDebug` **0 errors** / 55 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `NewerVersionAvailable`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
 
-Still **no third-party dependencies beyond Phase 1's**. The charts trio was the work most likely to break that, and it didn't: both charts are hand-drawn `View` subclasses in `ui/common/view/` whose geometry lives in pure, tested companion functions.
+**Production dependencies are still exactly Phase 1's.** The charts trio was the work most likely to break that, and it didn't: both charts are hand-drawn `View` subclasses in `ui/common/view/` whose geometry lives in pure, tested companion functions. The single addition since is **`kotlinx-coroutines-test`**, `testImplementation` only ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)) — it reuses the `coroutines` version already pinned in the catalogue, so it ships nothing into the APK and adds no version to track.
 
 ## What's left
 
 Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was dropped from scope by the user on 2026-09-04.** There is no committed work outstanding.
 
-Two gaps this file used to list are now **closed** — edit/delete of transactions (#7) and creating scheduled bills (#8). Don't rebuild them.
+Three gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), and direct ViewModel tests (#10). Don't rebuild them.
+
+**All 11 ViewModels now have direct `StateFlow` tests** (55 of them, in 8 suites mirroring each ViewModel's package). The pattern to follow when adding more:
+
+- `MainDispatcherRule` swaps `Dispatchers.Main`, which anything touching `viewModelScope` needs or it throws outright on the JVM.
+- **`subscribe(flow)` is load-bearing** — every ViewModel here shares state with `SharingStarted.WhileSubscribed`, which sits on its initial value forever without a subscriber. Assertions written without it pass against empty state and prove nothing. If a new ViewModel test passes suspiciously easily, check this first.
+- `Fixtures.kt` holds model builders with defaults; the three `Fake*Repository` classes in `domain/usecase/` are shared by the use-case and ViewModel suites alike. Extend those rather than writing new fakes.
+- The four Reports ViewModels share one suite and need no dispatcher rule — three are single cold-flow methods that never touch `viewModelScope`.
+
+The pure-object route (`BillBuckets`, `MonthlyTotals`, `MonthRange`, `CalendarMonth`) is still the right first reach for decision logic; the ViewModel suites exist for the wiring it cannot see.
+
+**`HomeViewModel`, `WalletViewModel` and `CalendarViewModel` read `System.currentTimeMillis()` internally**, so their tests build fixtures relative to "now" rather than pinning a clock. Injecting a clock would test them more tightly and is the obvious next increment if these ever turn flaky — it was left out as a production change beyond #10's scope.
 
 Open threads, in the order they'd most likely matter — none of these has been agreed, so **ask before starting any of them**:
 
-- **11 ViewModels, 0 direct tests.** This is the live thread and the one the user named as the scaling concern. All 50 tests cover use cases and pure objects; nothing tests a ViewModel. Every bug that shipped during Phase 2 lived in exactly that layer — the Bills `TabLayout` desyncing from its retained ViewModel, the category-selection race in the edit sheet, the field-clobbering trap on save — and every one was caught by a human looking at a screenshot, which does not scale.
-  - **Cheap route, no new dependency:** keep extracting decision logic into pure objects and test those. `ui/bills/BillBuckets`, `ui/reports/billing/MonthlyTotals`, `ui/common/util/MonthRange` and `ui/calendar/CalendarMonth` are the existing examples of the pattern.
-  - **Thorough route:** test the ViewModels directly by asserting on their `StateFlow`s. Catches the wiring bugs the pure-function route cannot, but needs **`kotlinx-coroutines-test`** — which would be this project's *first* new dependency after four sub-projects deliberately held that line. **That is the user's decision, not Claude's — ask, don't assume.**
 - **Settings has no home.** Reports took its bottom-nav slot and `PlaceholderFragment` was deleted with it. A real Settings screen would need a new entry point — most likely a second icon in Home's header beside Calendar's — and, more to the point, a decision about what actually goes in it.
 - **The seeded database is the only data source.** There is no import, no export and no backup, and a schema change wipes everything by design.
 - **9 adapters call `notifyDataSetChanged()`**, rebinding everything on any change. Invisible at current data volumes and *not* worth pre-emptively fixing; it would start to matter in the hundreds of rows. Data access itself is in good shape — every transaction query is bounded by date range or status, and nothing loads transactions unbounded.
