@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:background="@drawable/bg_rounded_card_16"
-            android:backgroundTint="@color/background_light_gray"
+            android:backgroundTint="@color/background"
             android:drawableStart="@drawable/ic_calendar_24"
             android:drawablePadding="8dp"
             android:gravity="center_vertical"

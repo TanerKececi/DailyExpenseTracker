@@ -6,7 +6,7 @@
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">@color/purple_primary_variant</item>
         <item name="colorSecondaryVariant">@color/purple_accent_light</item>
-        <item name="android:windowBackground">@color/background_light_gray</item>
+        <item name="android:windowBackground">@color/background</item>
         <item name="android:statusBarColor">@color/purple_primary</item>
     </style>
 

@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             app:indicatorColor="@color/soft_red"
-            app:trackColor="@color/background_light_gray"
+            app:trackColor="@color/background"
             app:trackCornerRadius="4dp"
             tools:progress="50" />
 
