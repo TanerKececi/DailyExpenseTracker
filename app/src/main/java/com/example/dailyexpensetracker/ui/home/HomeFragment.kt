@@ -50,6 +50,10 @@ class HomeFragment : Fragment() {
             findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToCalendarFragment())
         }
 
+        binding.ivSettings.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToSettingsFragment())
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
