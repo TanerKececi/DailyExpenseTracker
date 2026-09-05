@@ -27,21 +27,26 @@ object DatabaseSeeder {
             CategoryEntity(name = "Kids", iconName = "kids", colorHex = "#EB5FBD", budgetLimit = 500.0, isExpense = true),
             CategoryEntity(name = "Salary", iconName = "salary", colorHex = "#5A67F2", budgetLimit = null, isExpense = false)
         )
-        categoryDao.insertAll(categories)
+        val categoryIds = categoryDao.insertAll(categories)
 
         val cards = listOf(
             CardEntity(cardName = "Primary Visa", cardNumberMasked = "**** 9324", currentBalance = 10450.00, cardType = CardType.VISA),
             CardEntity(cardName = "Mastercard", cardNumberMasked = "**** 7645", currentBalance = 37.49, cardType = CardType.MASTERCARD)
         )
-        cardDao.insertAll(cards)
+        val cardIds = cardDao.insertAll(cards)
 
-        // categoryId indices below correspond to insertion order above (autoGenerate starts at 1)
-        val groceryId = 1L
-        val foodId = 2L
-        val clothesId = 3L
-        val medicineId = 5L
-        val fuelId = 6L
-        val salaryId = 10L
+        // Ids as actually assigned by the inserts above, by position in those lists. Hardcoding
+        // 1..10 held only on a fresh database: autoGenerate emits AUTOINCREMENT, whose sequence
+        // survives a row delete, so a reseed would leave every transaction below pointing at a
+        // category that no longer exists and the foreign key would reject the insert.
+        val groceryId = categoryIds[0]
+        val foodId = categoryIds[1]
+        val clothesId = categoryIds[2]
+        val medicineId = categoryIds[4]
+        val fuelId = categoryIds[5]
+        val salaryId = categoryIds[9]
+        val primaryCardId = cardIds[0]
+        val secondaryCardId = cardIds[1]
 
         val now = Calendar.getInstance()
         // Clamp within the current month so seed data always shows up in the "this month"
@@ -62,15 +67,15 @@ object DatabaseSeeder {
         }
 
         val transactions = listOf(
-            TransactionEntity(title = "Medicine", amount = 2680.0, date = daysAgo(1), categoryId = medicineId, cardId = 1, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Restaurant", amount = 2680.0, date = daysAgo(2), categoryId = foodId, cardId = 1, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Cloth Shopping", amount = 2680.0, date = daysAgo(3), categoryId = clothesId, cardId = 2, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Grocery Store", amount = 1230.0, date = daysAgo(4), categoryId = groceryId, cardId = 1, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Gas Station", amount = 450.0, date = daysAgo(5), categoryId = fuelId, cardId = 1, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Monthly Salary", amount = 10500.0, date = daysAgo(6), categoryId = salaryId, cardId = 1, type = TransactionType.INCOME, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Grocery Restock", amount = 540.0, date = daysAgo(0), categoryId = groceryId, cardId = 2, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
-            TransactionEntity(title = "Pharmacy Refill", amount = 1250.65, date = daysAhead(3), categoryId = medicineId, cardId = 1, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.UPCOMING, payeeName = "City Pharmacy", payeeRole = "Pharmacy"),
-            TransactionEntity(title = "Overdue Bill", amount = 320.0, date = daysAgo(2), categoryId = foodId, cardId = 2, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.OVERDUE, payeeName = "Stephen Thomas", payeeRole = "House Owner")
+            TransactionEntity(title = "Medicine", amount = 2680.0, date = daysAgo(1), categoryId = medicineId, cardId = primaryCardId, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Restaurant", amount = 2680.0, date = daysAgo(2), categoryId = foodId, cardId = primaryCardId, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Cloth Shopping", amount = 2680.0, date = daysAgo(3), categoryId = clothesId, cardId = secondaryCardId, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Grocery Store", amount = 1230.0, date = daysAgo(4), categoryId = groceryId, cardId = primaryCardId, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Gas Station", amount = 450.0, date = daysAgo(5), categoryId = fuelId, cardId = primaryCardId, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Monthly Salary", amount = 10500.0, date = daysAgo(6), categoryId = salaryId, cardId = primaryCardId, type = TransactionType.INCOME, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Grocery Restock", amount = 540.0, date = daysAgo(0), categoryId = groceryId, cardId = secondaryCardId, type = TransactionType.EXPENSE, status = TransactionStatus.PAID),
+            TransactionEntity(title = "Pharmacy Refill", amount = 1250.65, date = daysAhead(3), categoryId = medicineId, cardId = primaryCardId, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.UPCOMING, payeeName = "City Pharmacy", payeeRole = "Pharmacy"),
+            TransactionEntity(title = "Overdue Bill", amount = 320.0, date = daysAgo(2), categoryId = foodId, cardId = secondaryCardId, type = TransactionType.EXPENSE, isScheduled = true, status = TransactionStatus.OVERDUE, payeeName = "Stephen Thomas", payeeRole = "House Owner")
         )
         transactionDao.insertAll(transactions)
     }

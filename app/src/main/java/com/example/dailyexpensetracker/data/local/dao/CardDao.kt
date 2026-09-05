@@ -12,6 +12,10 @@ interface CardDao {
     @Query("SELECT * FROM cards ORDER BY id ASC")
     fun getAll(): Flow<List<CardEntity>>
 
+    /** Returns the ids actually assigned, which the seeder needs for its foreign keys. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(cards: List<CardEntity>)
+    suspend fun insertAll(cards: List<CardEntity>): List<Long>
+
+    @Query("DELETE FROM cards")
+    suspend fun deleteAll()
 }

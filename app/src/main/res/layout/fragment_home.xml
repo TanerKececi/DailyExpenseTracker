@@ -53,6 +53,15 @@
                     android:contentDescription="@string/calendar_title"
                     android:src="@drawable/ic_calendar_24"
                     app:tint="@color/white" />
+
+                <ImageView
+                    android:id="@+id/ivSettings"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="@string/settings_title"
+                    android:src="@drawable/ic_settings_24"
+                    app:tint="@color/white" />
             </LinearLayout>
 
             <androidx.cardview.widget.CardView

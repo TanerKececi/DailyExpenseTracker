@@ -2,9 +2,11 @@ package com.example.dailyexpensetracker.di
 
 import com.example.dailyexpensetracker.data.repository.CardRepositoryImpl
 import com.example.dailyexpensetracker.data.repository.CategoryRepositoryImpl
+import com.example.dailyexpensetracker.data.repository.DataResetRepositoryImpl
 import com.example.dailyexpensetracker.data.repository.TransactionRepositoryImpl
 import com.example.dailyexpensetracker.domain.repository.CardRepository
 import com.example.dailyexpensetracker.domain.repository.CategoryRepository
+import com.example.dailyexpensetracker.domain.repository.DataResetRepository
 import com.example.dailyexpensetracker.domain.repository.TransactionRepository
 import dagger.Binds
 import dagger.Module
@@ -23,4 +25,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindCardRepository(impl: CardRepositoryImpl): CardRepository
+
+    @Binds
+    abstract fun bindDataResetRepository(impl: DataResetRepositoryImpl): DataResetRepository
 }

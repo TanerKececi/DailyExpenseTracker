@@ -9,6 +9,8 @@ import com.example.dailyexpensetracker.subscribe
 import com.example.dailyexpensetracker.testCategory
 import com.example.dailyexpensetracker.testTransaction
 import com.example.dailyexpensetracker.ui.common.util.MonthRange
+import com.example.dailyexpensetracker.ui.settings.FakeSettingsStore
+import com.example.dailyexpensetracker.ui.settings.SettingsStore
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -39,9 +41,10 @@ class CalendarViewModelTest {
     private val transactionRepository = FakeTransactionRepository()
     private val categoryRepository = FakeCategoryRepository()
 
-    private fun viewModel() = CalendarViewModel(
+    private fun viewModel(settingsStore: SettingsStore = FakeSettingsStore()) = CalendarViewModel(
         GetTransactionsForPeriodUseCase(transactionRepository),
-        GetCategoriesUseCase(categoryRepository)
+        GetCategoriesUseCase(categoryRepository),
+        settingsStore
     )
 
     private fun dayOfMonth(millis: Long) = MonthRange.calendarAt(millis).get(Calendar.DAY_OF_MONTH)
@@ -133,5 +136,22 @@ class CalendarViewModelTest {
         viewModel.nextMonth()
         viewModel.selectDay(MonthRange.dayStart(nextMonthDay))
         assertEquals(listOf(2L), viewModel.uiState.value.dayItems.map { it.transaction.id })
+    }
+
+    /**
+     * A Monday week shifts every column one place left of a Sunday week, wrapping at seven. The
+     * fragment's header row must be rotated by the same amount or the grid and its labels disagree.
+     */
+    @Test
+    fun `the grid honours a Monday week start`() = runTest {
+        val sundayStart = viewModel(FakeSettingsStore(weekStart = Calendar.SUNDAY))
+        subscribe(sundayStart.uiState)
+        val sundayBlanks = sundayStart.uiState.value.cells.count { it.dayOfMonth == null }
+
+        val mondayStart = viewModel(FakeSettingsStore(weekStart = Calendar.MONDAY))
+        subscribe(mondayStart.uiState)
+        val mondayBlanks = mondayStart.uiState.value.cells.count { it.dayOfMonth == null }
+
+        assertEquals((sundayBlanks + 6) % 7, mondayBlanks)
     }
 }

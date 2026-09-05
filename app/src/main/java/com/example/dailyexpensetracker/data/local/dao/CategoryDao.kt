@@ -18,6 +18,10 @@ interface CategoryDao {
     @Query("UPDATE categories SET budgetLimit = :limit WHERE id = :id")
     suspend fun updateBudget(id: Long, limit: Double?)
 
+    /** Returns the ids actually assigned, which the seeder needs for its foreign keys. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(categories: List<CategoryEntity>)
+    suspend fun insertAll(categories: List<CategoryEntity>): List<Long>
+
+    @Query("DELETE FROM categories")
+    suspend fun deleteAll()
 }
