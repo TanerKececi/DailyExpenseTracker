@@ -1,5 +1,6 @@
 package com.example.dailyexpensetracker.ui.settings
 
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.dailyexpensetracker.domain.repository.DataResetRepository
 import com.example.dailyexpensetracker.domain.usecase.ResetDataUseCase
 import com.example.dailyexpensetracker.ui.common.util.CurrencyFormatter
@@ -86,6 +87,42 @@ class SettingsViewModelTest {
             assertEquals(symbol, viewModel.uiState.value.currencySymbol)
             assertTrue(CurrencyFormatter.format(12.5).startsWith(symbol))
         }
+    }
+
+    @Test
+    fun `appearance defaults to following the system`() {
+        assertEquals(
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            viewModel().uiState.value.nightMode
+        )
+    }
+
+    @Test
+    fun `every appearance mode round-trips`() {
+        val store = FakeSettingsStore()
+        val viewModel = viewModel(store)
+
+        for (mode in listOf(
+            AppCompatDelegate.MODE_NIGHT_NO,
+            AppCompatDelegate.MODE_NIGHT_YES,
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        )) {
+            viewModel.setNightMode(mode)
+
+            assertEquals(mode, viewModel.uiState.value.nightMode)
+            assertEquals(mode, store.nightMode)
+        }
+    }
+
+    @Test
+    fun `changing appearance leaves currency and week start alone`() {
+        val store = FakeSettingsStore()
+        val viewModel = viewModel(store)
+
+        viewModel.setNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+
+        assertEquals(CurrencyFormatter.DEFAULT_SYMBOL, store.currencySymbol)
+        assertEquals(SettingsStore.DEFAULT_WEEK_START, store.weekStart)
     }
 
     @Test

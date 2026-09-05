@@ -11,7 +11,8 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val currencySymbol: String,
-    val weekStart: Int
+    val weekStart: Int,
+    val nightMode: Int
 )
 
 @HiltViewModel
@@ -23,7 +24,7 @@ class SettingsViewModel @Inject constructor(
     // A plain MutableStateFlow rather than stateIn: the source is a synchronous store, so there is
     // no upstream to share and nothing for SharingStarted to start.
     private val _uiState = MutableStateFlow(
-        SettingsUiState(settingsStore.currencySymbol, settingsStore.weekStart)
+        SettingsUiState(settingsStore.currencySymbol, settingsStore.weekStart, settingsStore.nightMode)
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -38,6 +39,17 @@ class SettingsViewModel @Inject constructor(
     fun setWeekStart(weekStart: Int) {
         settingsStore.weekStart = weekStart
         _uiState.value = _uiState.value.copy(weekStart = weekStart)
+    }
+
+    /**
+     * Persists the choice only. Actually applying it is
+     * `AppCompatDelegate.setDefaultNightMode`, which the fragment calls — it recreates the running
+     * activity, so it is a view concern, and keeping it out of here leaves this class testable on a
+     * plain JVM without stubbing AppCompat.
+     */
+    fun setNightMode(mode: Int) {
+        settingsStore.nightMode = mode
+        _uiState.value = _uiState.value.copy(nightMode = mode)
     }
 
     suspend fun resetData() = resetDataUseCase()
