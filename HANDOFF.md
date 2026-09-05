@@ -5,7 +5,7 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), merged 2026-09-05.
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)) and **Settings** ([PR #11](https://github.com/TanerKececi/DailyExpenseTracker/pull/11)), 2026-09-05.
 - **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
 - **Next action:** none outstanding. See "What's left" below for the open threads, none of which are committed work.
 
@@ -17,7 +17,11 @@ Kotlin, MVVM + Clean Architecture (data/domain/ui), Room (KSP) + Hilt (KSP), Jet
 
 Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes), **Calendar** (month grid with per-day expense/income dots and a day-detail list), **Reports** (three tabs: Expense Chart donut, Budget Planner with editable limits, Billing Reports six-month bars, sharing one month selector).
 
-Bottom nav: Home / Bills / Wallet / Categories / **Reports**. Calendar opens from an icon in Home's header, since the nav's five slots are full.
+**Settings** (currency symbol, first day of week, reset data) reached from a gear icon in Home's header.
+
+Bottom nav: Home / Bills / Wallet / Categories / **Reports**. Calendar and Settings open from icons in Home's header, since the nav's five slots are full. `MainActivity` has no destination-changed listener, so the bottom nav and FAB stay visible on Calendar, Bill Detail and Settings alike — pre-existing, and changing it would affect all three.
+
+**Settings are `SharedPreferences`, read synchronously, and deliberately not reactive.** Every fragment collects inside `repeatOnLifecycle(STARTED)`, so returning to a screen re-subscribes, the `StateFlow` re-emits and the binding block re-formats everything — a changed setting reaches each screen on its next visit for free. Do not "improve" `SettingsStore` into a Flow, and do not add DataStore; the lifecycle already does that work. `CurrencyFormatter.symbol` is a deliberate piece of global mutable state (carrying a `ponytail:` comment) because the five call sites are adapters with no DI. `CalendarMonth.cellsFor` takes `weekStart` as a parameter defaulting to Sunday, and `CalendarFragment.bindWeekdayHeader()` rotates the header labels to match — **if those two ever disagree the grid misaligns, which looks exactly like an off-by-one in `CalendarMonth` and sends you debugging the wrong file.**
 
 The Add-Transaction sheet is also the **editor**: tapping a row in Wallet or in the Calendar day list reopens it prefilled, with a Delete button behind a confirmation. It carries the loaded transaction's `cardId`, `isScheduled` and `status` through on save — do not "simplify" that away, or editing a bill silently converts it into an ordinary paid transaction. A **"Scheduled bill"** switch creates `UPCOMING` transactions with optional payee name/role.
 
@@ -25,7 +29,7 @@ The Add-Transaction sheet is also the **editor**: tapping a row in Wallet or in 
 
 **Overdue is derived, never stored.** `ui/bills/BillBuckets` treats any scheduled bill whose due date has passed as overdue, so bills move tabs on their own with no background job. A bill due *today* is not overdue. Don't reintroduce a stored-status approach — it goes stale the moment a due date passes.
 
-Verified end-to-end on the emulator. `testDebugUnitTest` **105/105 pass** across 16 suites, `lintDebug` **0 errors** / 55 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `NewerVersionAvailable`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
+Verified end-to-end on the emulator. `testDebugUnitTest` **126/126 pass** across 20 suites, `lintDebug` **0 errors** / 57 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `NewerVersionAvailable`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
 
 **Production dependencies are still exactly Phase 1's.** The charts trio was the work most likely to break that, and it didn't: both charts are hand-drawn `View` subclasses in `ui/common/view/` whose geometry lives in pure, tested companion functions. The single addition since is **`kotlinx-coroutines-test`**, `testImplementation` only ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)) — it reuses the `coroutines` version already pinned in the catalogue, so it ships nothing into the APK and adds no version to track.
 
@@ -33,7 +37,9 @@ Verified end-to-end on the emulator. `testDebugUnitTest` **105/105 pass** across
 
 Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was dropped from scope by the user on 2026-09-04.** There is no committed work outstanding.
 
-Three gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), and direct ViewModel tests (#10). Don't rebuild them.
+Four gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), direct ViewModel tests (#10), and Settings (#11). Don't rebuild them.
+
+**`DatabaseSeeder` no longer hardcodes ids.** It used to set `groceryId = 1L … salaryId = 10L` on the assumption that `autoGenerate` starts at 1 — true only on a fresh database. `AUTOINCREMENT` sequences survive a row delete, so the first use of Reset data would have inserted categories at fresh ids while transactions still referenced 1–10, and the foreign key would have rejected them. `insertAll` now returns `List<Long>` and the seeder uses what Room actually assigned. Don't reintroduce the constants.
 
 **All 11 ViewModels now have direct `StateFlow` tests** (55 of them, in 8 suites mirroring each ViewModel's package). The pattern to follow when adding more:
 
@@ -48,7 +54,9 @@ The pure-object route (`BillBuckets`, `MonthlyTotals`, `MonthRange`, `CalendarMo
 
 Open threads, in the order they'd most likely matter — none of these has been agreed, so **ask before starting any of them**:
 
-- **Settings has no home.** Reports took its bottom-nav slot and `PlaceholderFragment` was deleted with it. A real Settings screen would need a new entry point — most likely a second icon in Home's header beside Calendar's — and, more to the point, a decision about what actually goes in it.
+- **Dark mode is a colour-system refactor, not a toggle.** This is the live thread, and the one piece deliberately cut from Settings (#11). The app *looks* dark-ready — the theme is `Theme.Material3.DayNight` and `values-night/` exists — but that directory holds **only `themes.xml`**. There is no `values-night/colors.xml`, and every custom colour is a light-mode literal: `@color/white` is used **43 times as a card surface**, `@color/text_primary` (`#1A1A2E`) 23 times, `@color/background_light_gray` 12 times. Enabling dark today yields near-black text on white cards on a light ground.
+  - The fix is not a night colours file. Overriding a colour *named* `white` to be dark is a trap for the next reader; the honest route is semantic names (`surface`, `on_surface`, `background`) across ~125 references in every layout, then `values-night`, then the Light/Dark/System setting as the last step. `SettingsStore` and its dialog pattern are already in place to hang it on.
+  - Budget it as larger than all three shipped settings combined, and note it is invisible to the build **and** to all 126 tests — only a dual-theme emulator walkthrough catches it. This is the same failure mode as the `background_light_gray` gotcha below, but systemic.
 - **The seeded database is the only data source.** There is no import, no export and no backup, and a schema change wipes everything by design.
 - **9 adapters call `notifyDataSetChanged()`**, rebinding everything on any change. Invisible at current data volumes and *not* worth pre-emptively fixing; it would start to matter in the hundreds of rows. Data access itself is in good shape — every transaction query is bounded by date range or status, and nothing loads transactions unbounded.
 - Smaller deferrals live in each spec's "Explicitly Out of Scope" section — chart interaction, custom date ranges, report export, locale-aware week start.
