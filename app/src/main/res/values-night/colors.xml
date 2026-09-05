@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Dark overrides. Only colours whose role flips between themes appear here.
+
+      The purple brand colours and @color/white are deliberately absent: the header stays purple in
+      dark mode, so white-on-purple remains correct and needs no dark value. Every remaining use of
+      @color/white is foreground on a coloured shape - the header, the purple payment card, or a
+      category-coloured bg_circle - all of which keep their colour here.
+
+      soft_red / soft_green / soft_blue are also absent. They are already pastel and should read on
+      #1E1E1E; add an override only if a screenshot shows one failing, rather than guessing now.
+
+      Surfaces stay one step lighter than the ground so the existing 2dp cardElevation still reads,
+      mirroring the light theme's white-on-light-grey relationship.
+    -->
+    <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="text_primary">#E6E1E5</color>
+    <color name="text_secondary">#A8A3AD</color>
+    <color name="divider">#2E2E2E</color>
+</resources>
