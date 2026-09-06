@@ -70,6 +70,25 @@ Existing specs and plans are good templates — [Bills](docs/superpowers/specs/2
 
 Note the ordering trick Reports used: the three tab fragments were built **before** the host that instantiates them, so no task ever referenced code that didn't exist yet.
 
+## CI
+
+`.github/workflows/ci.yml` runs `testDebugUnitTest` and `lintDebug` on push to `master` and on every
+pull request, uploading both reports as artefacts. The README carries the badge.
+
+**`org.gradle.java.home` is no longer in the repo.** It moved to the user-level
+`~/.gradle/gradle.properties` on this machine, because a committed Windows path breaks every clone
+on another OS and every CI runner. Android Studio still picks it up — `.idea/gradle.xml` uses
+`#GRADLE_LOCAL_JAVA_HOME`, which resolves through exactly that setting. **Do not put it back.**
+Gradle toolchains are not a substitute: the constraint is the JDK running Gradle itself, not the one
+compiling the code.
+
+The workflow pins **JDK 21** deliberately. Moving it to 22+ reintroduces the Gradle 8.13 Kotlin DSL
+version-parsing failure that caused the original local pin.
+
+**CI reports two more lint warnings than a local run** (60 vs 58) — `AndroidGradlePluginVersion` and
+`OldTargetApi` are network-dependent "a newer version exists" advisories that resolve on a fresh
+runner. Both are the pinned-version category this project ignores. Errors are 0 in both.
+
 ## Environment setup — do this before touching code
 
 **You (Claude) cannot run Gradle in this environment at all.** Every `gradlew` invocation fails with `java.io.IOException: Unable to establish loopback connection` — including with `dangerouslyDisableSandbox: true` (confirmed again 2026-09-04). It is a machine-level restriction on Claude's process tree, not a permission prompt. Don't retry it. Full detail in project memory `dailyexpensetracker-watch-build-workflow`.
