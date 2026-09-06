@@ -1,5 +1,7 @@
 # Daily Expense Tracker
 
+[![CI](https://github.com/TanerKececi/DailyExpenseTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/TanerKececi/DailyExpenseTracker/actions/workflows/ci.yml)
+
 A personal finance tracker for Android — transactions, scheduled bills, a spending calendar and three
 report views — built in Kotlin with MVVM + Clean Architecture, Room and Hilt.
 
