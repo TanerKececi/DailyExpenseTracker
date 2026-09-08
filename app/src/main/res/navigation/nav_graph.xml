@@ -14,6 +14,21 @@
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_categoryDetailFragment"
+            app:destination="@id/categoryDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoryDetailFragment"
+        android:name="com.example.dailyexpensetracker.ui.categorydetail.CategoryDetailFragment"
+        android:label="@string/nav_categories">
+        <argument
+            android:name="categoryId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_categoryDetailFragment_to_addTransactionSheet"
+            app:destination="@id/addTransactionSheet" />
     </fragment>
 
     <fragment
@@ -60,7 +75,11 @@
     <fragment
         android:id="@+id/categoriesFragment"
         android:name="com.example.dailyexpensetracker.ui.categories.CategoriesFragment"
-        android:label="@string/nav_categories" />
+        android:label="@string/nav_categories">
+        <action
+            android:id="@+id/action_categoriesFragment_to_categoryDetailFragment"
+            app:destination="@id/categoryDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/reportsFragment"
