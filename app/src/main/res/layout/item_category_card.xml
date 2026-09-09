@@ -20,6 +20,7 @@
 
         <ImageView
             android:id="@+id/ivIcon"
+            android:contentDescription="@null"
             android:layout_width="28dp"
             android:layout_height="28dp"
             app:tint="@color/white"
