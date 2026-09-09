@@ -84,7 +84,16 @@
     <fragment
         android:id="@+id/reportsFragment"
         android:name="com.example.dailyexpensetracker.ui.reports.ReportsFragment"
-        android:label="@string/nav_reports" />
+        android:label="@string/nav_reports">
+        <!--
+          The Expense Chart legend lives in a child fragment added via childFragmentManager, which
+          is not a navigation destination. The action therefore belongs to reportsFragment, the
+          destination that is actually current when the legend is on screen.
+        -->
+        <action
+            android:id="@+id/action_reportsFragment_to_categoryDetailFragment"
+            app:destination="@id/categoryDetailFragment" />
+    </fragment>
 
     <dialog
         android:id="@+id/addTransactionSheet"

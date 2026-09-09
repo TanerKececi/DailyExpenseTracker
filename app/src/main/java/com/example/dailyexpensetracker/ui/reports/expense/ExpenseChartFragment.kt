@@ -10,10 +10,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dailyexpensetracker.databinding.FragmentExpenseChartBinding
 import com.example.dailyexpensetracker.ui.common.util.CurrencyFormatter
 import com.example.dailyexpensetracker.ui.common.view.DonutChartView
+import com.example.dailyexpensetracker.ui.reports.ReportsFragmentDirections
 import com.example.dailyexpensetracker.ui.reports.ReportsViewModel
 import com.example.dailyexpensetracker.ui.reports.expense.adapter.LegendAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,7 +33,13 @@ class ExpenseChartFragment : Fragment() {
     private val viewModel: ExpenseChartViewModel by viewModels()
     private val reportsViewModel: ReportsViewModel by viewModels(ownerProducer = { requireParentFragment() })
 
-    private val legendAdapter = LegendAdapter()
+    // findNavController() walks up to the host NavController, and the current destination is
+    // reportsFragment — this fragment is a child added via childFragmentManager, not a destination.
+    private val legendAdapter = LegendAdapter { category ->
+        findNavController().navigate(
+            ReportsFragmentDirections.actionReportsFragmentToCategoryDetailFragment(category.id)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
