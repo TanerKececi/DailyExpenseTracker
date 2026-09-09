@@ -41,12 +41,11 @@ Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was
 
 Six gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), direct ViewModel tests (#10), Settings (#11), dark mode (#13), and dead display screens (#16). Don't rebuild them.
 
-**Two adapters are still deliberately inert**, and this is the most visible remaining gap. An audit in #16 found five adapters with no click handling; three were fixed by Category Detail. The remaining two:
+**One adapter is still deliberately inert.** An audit in #16 found five adapters with no click handling; three were fixed by Category Detail and the Reports legend followed in #17. The remaining one:
 
 - **`CardCarouselAdapter`** (Wallet payment cards). Needs its own answer — probably a card-filtered transaction list — which is a separate destination and a separate decision.
-- **`LegendAdapter`** (Reports → Expenses chart legend). Now a **one-line change**: the rows carry a `Category`, and `action_...ToCategoryDetailFragment` already exists. It was deferred rather than bundled, not because it is hard.
 
-Every other list in the app is tappable. If you are looking for a cheap, visible win, the legend is it.
+**Navigating from a Reports tab is not like the other screens.** The three Reports tabs are child fragments added via `childFragmentManager`, so they are **not navigation destinations**. An action from a tab therefore belongs to `reportsFragment`, the destination that is actually current, and the child calls `findNavController()` (which walks up to the host controller) with `ReportsFragmentDirections`. That class is generated into `ui.reports`, so a tab in `ui.reports.expense` must **import it explicitly** or the build fails.
 
 **Dark mode is done and the app is genuinely dark-ready.** `values-night/colors.xml` overrides five colours — `background` `#121212`, `surface` `#1E1E1E`, `text_primary` `#E6E1E5`, `text_secondary` `#A8A3AD`, `divider` `#2E2E2E`. The purple header deliberately stays purple in both themes, which is why `white` and the brand colours have no night values. `values-night/themes.xml` was deleted as a byte-identical duplicate — don't recreate it; the light theme's colour references resolve per-theme on their own.
 
