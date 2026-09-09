@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.dailyexpensetracker.databinding.FragmentCategoriesBinding
 import com.example.dailyexpensetracker.ui.categories.adapter.CategoryGridAdapter
@@ -22,7 +23,11 @@ class CategoriesFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: CategoriesViewModel by viewModels()
 
-    private val adapter = CategoryGridAdapter()
+    private val adapter = CategoryGridAdapter { category ->
+        findNavController().navigate(
+            CategoriesFragmentDirections.actionCategoriesFragmentToCategoryDetailFragment(category.id)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

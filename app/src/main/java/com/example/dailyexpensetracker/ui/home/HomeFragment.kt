@@ -25,8 +25,17 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels()
 
-    private val topSpendingAdapter = TopSpendingAdapter()
-    private val monthlyBudgetAdapter = MonthlyBudgetAdapter()
+    private val topSpendingAdapter = TopSpendingAdapter { category ->
+        findNavController().navigate(
+            HomeFragmentDirections.actionHomeFragmentToCategoryDetailFragment(category.id)
+        )
+    }
+
+    private val monthlyBudgetAdapter = MonthlyBudgetAdapter { categorySpend ->
+        findNavController().navigate(
+            HomeFragmentDirections.actionHomeFragmentToCategoryDetailFragment(categorySpend.category.id)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

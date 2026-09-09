@@ -8,7 +8,10 @@ import com.example.dailyexpensetracker.databinding.ItemCategoryCardBinding
 import com.example.dailyexpensetracker.domain.model.Category
 import com.example.dailyexpensetracker.ui.common.util.CategoryIconMapper
 
-class CategoryGridAdapter : RecyclerView.Adapter<CategoryGridAdapter.ViewHolder>() {
+/** Tiles are inert unless [onClick] is supplied — Categories passes one to open Category Detail. */
+class CategoryGridAdapter(
+    private val onClick: ((Category) -> Unit)? = null
+) : RecyclerView.Adapter<CategoryGridAdapter.ViewHolder>() {
 
     private var items: List<Category> = emptyList()
 
@@ -21,16 +24,20 @@ class CategoryGridAdapter : RecyclerView.Adapter<CategoryGridAdapter.ViewHolder>
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemCategoryCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+        return ViewHolder(binding, onClick)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position])
 
-    class ViewHolder(private val binding: ItemCategoryCardBinding) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(
+        private val binding: ItemCategoryCardBinding,
+        private val onClick: ((Category) -> Unit)?
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Category) {
             binding.tvName.text = item.name
             binding.ivIcon.setImageResource(CategoryIconMapper.iconFor(item.iconName))
             runCatching { Color.parseColor(item.colorHex) }.getOrNull()?.let { binding.cardContent.setBackgroundColor(it) }
+            onClick?.let { click -> binding.root.setOnClickListener { click(item) } }
         }
     }
 }

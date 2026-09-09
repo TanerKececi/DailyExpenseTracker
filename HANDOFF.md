@@ -5,7 +5,7 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), **Settings** ([PR #11](https://github.com/TanerKececi/DailyExpenseTracker/pull/11)) and **dark mode** ([PR #13](https://github.com/TanerKececi/DailyExpenseTracker/pull/13)), 2026-09-05.
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), **Settings** ([PR #11](https://github.com/TanerKececi/DailyExpenseTracker/pull/11)) and **dark mode** ([PR #13](https://github.com/TanerKececi/DailyExpenseTracker/pull/13)) on 2026-09-05, then **Category Detail** ([PR #16](https://github.com/TanerKececi/DailyExpenseTracker/pull/16)) on 2026-09-09. The repo also has a **README with screenshots** (#14) and **CI** (#15).
 - **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
 - **Next action:** none outstanding. See "What's left" below for the open threads, none of which are committed work.
 
@@ -16,6 +16,8 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 Kotlin, MVVM + Clean Architecture (data/domain/ui), Room (KSP) + Hilt (KSP), Jetpack Navigation Component with Safe Args + BottomNavigationView, DataBinding + ViewBinding.
 
 Screens: Home, My Wallet, Categories, Add-Transaction (bottom sheet), **Bills** (Paid/Overdue/Upcoming tabs + live search), **Schedule Bill Detail** (Approve marks Paid, Decline deletes), **Calendar** (month grid with per-day expense/income dots and a day-detail list), **Reports** (three tabs: Expense Chart donut, Budget Planner with editable limits, Billing Reports six-month bars, sharing one month selector).
+
+**Category Detail** (`ui/categorydetail/`) — one category's transactions for a selected month, with its total against its budget. Reached from **three** entry points: the Categories grid, Home's Top Spending circles, and Home's Monthly Budget cards. It adds nothing below the UI layer: the list reuses `RecentTransactionAdapter` (its fourth consumer) and the data is `GetTransactionsForPeriodUseCase` filtered by `categoryId` in the ViewModel, so every query stays bounded by date range. **The budget line is hidden when `budgetLimit` is null** — income categories have no limit, and "of $0.00" would be wrong.
 
 **Settings** (appearance, currency symbol, first day of week, reset data) reached from a gear icon in Home's header. Appearance is System / Light / Dark, applied via `AppCompatDelegate.setDefaultNightMode` — from `DailyExpenseTrackerApp.onCreate` at startup and from `SettingsFragment` on change. **The fragment calls it, not the ViewModel**: it is an AppCompat UI singleton that recreates the activity, and keeping it out of the ViewModel is what lets that class be unit-tested on a plain JVM.
 
@@ -29,7 +31,7 @@ The Add-Transaction sheet is also the **editor**: tapping a row in Wallet or in 
 
 **Overdue is derived, never stored.** `ui/bills/BillBuckets` treats any scheduled bill whose due date has passed as overdue, so bills move tabs on their own with no background job. A bill due *today* is not overdue. Don't reintroduce a stored-status approach — it goes stale the moment a due date passes.
 
-Verified end-to-end on the emulator. `testDebugUnitTest` **129/129 pass** across 20 suites, `lintDebug` **0 errors** / 58 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `NewerVersionAvailable`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
+Verified end-to-end on the emulator. `testDebugUnitTest` **138/138 pass** across 21 suites, `lintDebug` **0 errors** / 59 warnings (all benign categories — `SetTextI18n`, `GradleDependency`, `NotifyDataSetChanged`, `NewerVersionAvailable`, `UseCompoundDrawables`, `UseKtx`, etc. Do not "fix" the pinned-dependency version warnings).
 
 **Production dependencies are still exactly Phase 1's.** The charts trio was the work most likely to break that, and it didn't: both charts are hand-drawn `View` subclasses in `ui/common/view/` whose geometry lives in pure, tested companion functions. The single addition since is **`kotlinx-coroutines-test`**, `testImplementation` only ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)) — it reuses the `coroutines` version already pinned in the catalogue, so it ships nothing into the APK and adds no version to track.
 
@@ -37,7 +39,14 @@ Verified end-to-end on the emulator. `testDebugUnitTest` **129/129 pass** across
 
 Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was dropped from scope by the user on 2026-09-04.** There is no committed work outstanding.
 
-Five gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), direct ViewModel tests (#10), Settings (#11), and dark mode (#13). Don't rebuild them.
+Six gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), direct ViewModel tests (#10), Settings (#11), dark mode (#13), and dead display screens (#16). Don't rebuild them.
+
+**Two adapters are still deliberately inert**, and this is the most visible remaining gap. An audit in #16 found five adapters with no click handling; three were fixed by Category Detail. The remaining two:
+
+- **`CardCarouselAdapter`** (Wallet payment cards). Needs its own answer — probably a card-filtered transaction list — which is a separate destination and a separate decision.
+- **`LegendAdapter`** (Reports → Expenses chart legend). Now a **one-line change**: the rows carry a `Category`, and `action_...ToCategoryDetailFragment` already exists. It was deferred rather than bundled, not because it is hard.
+
+Every other list in the app is tappable. If you are looking for a cheap, visible win, the legend is it.
 
 **Dark mode is done and the app is genuinely dark-ready.** `values-night/colors.xml` overrides five colours — `background` `#121212`, `surface` `#1E1E1E`, `text_primary` `#E6E1E5`, `text_secondary` `#A8A3AD`, `divider` `#2E2E2E`. The purple header deliberately stays purple in both themes, which is why `white` and the brand colours have no night values. `values-night/themes.xml` was deleted as a byte-identical duplicate — don't recreate it; the light theme's colour references resolve per-theme on their own.
 
