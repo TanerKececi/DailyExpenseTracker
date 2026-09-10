@@ -58,13 +58,13 @@ Audited 2026-09-11. The app demonstrates architecture, testing, theming and cust
 
 | Gap | State | Why it matters |
 |---|---|---|
-| **Jetpack Compose** | zero — entirely View system | In 2026 Compose is the default for new Android. A portfolio with none of it reads as "hasn't touched anything recent". **This is the biggest gap.** |
+| ~~Jetpack Compose~~ | zero — entirely View system | **Ruled out by the user on 2026-09-11. Do not propose it again.** It was recommended twice as the biggest gap; the user declined. The app stays View-system. |
 | **Networking** | zero — no `INTERNET` permission, no HTTP client | A whole discipline is invisible: DTO↔domain mapping, loading/error state, retry, Room as single source of truth. |
 | **Instrumented tests** | 1 file (the template); all 138 real tests are JVM | The DAOs are only ever faked. In-memory Room tests would verify the real queries — including the `AUTOINCREMENT` behaviour the seeder fix was reasoned from but never actually observed. |
 
-**Recommended order: Compose first.** The architecture already suits it — ViewModels expose `StateFlow<UiState>`, so a Compose screen needs no architecture change. Rewriting **one** screen (Category Detail is newest, smallest, self-contained) demonstrates the harder and more realistic thing: **interop**, a Compose screen inside an existing Fragment/Navigation app.
+**With Compose ruled out, networking is the largest remaining gap.** It has a natural hook that is not contrived: the app already has a currency setting, so live exchange rates with a Room-cached offline fallback exercise the whole stack — HTTP client, DTO↔domain mapping, loading and error state, retry, and Room as single source of truth. It would also be the app's first production dependency since Phase 1, which is a decision for the user, not an assumption.
 
-**Networking has a natural hook that is not contrived:** the app already has a currency setting, so live exchange rates with Room-cached offline fallback exercises the whole stack.
+**Instrumented Room tests are the cheaper of the two**, and close a real loop: the DAOs are only ever faked, so the `AUTOINCREMENT` behaviour behind the `DatabaseSeeder` fix was reasoned from documentation and never actually observed against SQLite.
 
 **Skip multi-module and Paging 3.** At 11 screens and seeded data volumes both are structure for its own sake, and a thoughtful reviewer may read them as cargo-culting.
 
