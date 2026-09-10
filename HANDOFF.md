@@ -7,7 +7,18 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
 - **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), **Settings** ([PR #11](https://github.com/TanerKececi/DailyExpenseTracker/pull/11)) and **dark mode** ([PR #13](https://github.com/TanerKececi/DailyExpenseTracker/pull/13)) on 2026-09-05, then **Category Detail** ([PR #16](https://github.com/TanerKececi/DailyExpenseTracker/pull/16)) on 2026-09-09. The repo also has a **README with screenshots** (#14) and **CI** (#15).
 - **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
-- **Next action:** none outstanding. See "What's left" below for the open threads, none of which are committed work.
+- **In flight (2026-09-11):** branch `polish/accessibility`, **one commit, unpushed, unverified** — the five category icons marked `android:contentDescription="@null"`. Nothing has been built since that commit, so run `./gradlew installDebug testDebugUnitTest lintDebug` before trusting it. Expect 138/138 tests unchanged and lint warnings **59 → 54**.
+- **Open decision:** whether to convert the 9 adapters to `ListAdapter`/`DiffUtil`. See "What's left".
+
+## This is a portfolio project, not a product
+
+**The user's goal is showing this to interviewers on GitHub** (stated 2026-09-05). That reframes every scope decision, and it is not derivable from the code — the app looks like a real finance app.
+
+**Do not propose real-world data work.** Import/export, backup and restore, Room migrations, `allowBackup` hardening, encryption, crash reporting, analytics — the user explicitly said not to worry about data scenarios. `fallbackToDestructiveMigration()` and the seed-only database are fine permanently.
+
+Judge proposals by "would an interviewer notice this?", not "would a user want it".
+
+The repo is publish-ready: no build-portability blockers, a secret audit came back clean (2026-09-05), README with screenshots, CI badge. Flipping it public is just a switch.
 
 **Branch policy (user's standing instruction, 2026-09-03): do not push directly to `master`.** Work on a feature branch, push that, open a PR, merge. Ask before pushing or merging.
 
@@ -41,6 +52,22 @@ Phase 2 was originally decomposed into 4 sub-projects. Three shipped; **Auth was
 
 Six gaps this file used to list are now **closed** — edit/delete of transactions (#7), creating scheduled bills (#8), direct ViewModel tests (#10), Settings (#11), dark mode (#13), and dead display screens (#16). Don't rebuild them.
 
+### The capability gaps an interviewer would notice
+
+Audited 2026-09-11. The app demonstrates architecture, testing, theming and custom drawing well. What it demonstrates **not at all**:
+
+| Gap | State | Why it matters |
+|---|---|---|
+| ~~Jetpack Compose~~ | zero — entirely View system | **Ruled out by the user on 2026-09-11. Do not propose it again.** It was recommended twice as the biggest gap; the user declined. The app stays View-system. |
+| **Networking** | zero — no `INTERNET` permission, no HTTP client | A whole discipline is invisible: DTO↔domain mapping, loading/error state, retry, Room as single source of truth. |
+| **Instrumented tests** | 1 file (the template); all 138 real tests are JVM | The DAOs are only ever faked. In-memory Room tests would verify the real queries — including the `AUTOINCREMENT` behaviour the seeder fix was reasoned from but never actually observed. |
+
+**With Compose ruled out, networking is the largest remaining gap.** It has a natural hook that is not contrived: the app already has a currency setting, so live exchange rates with a Room-cached offline fallback exercise the whole stack — HTTP client, DTO↔domain mapping, loading and error state, retry, and Room as single source of truth. It would also be the app's first production dependency since Phase 1, which is a decision for the user, not an assumption.
+
+**Instrumented Room tests are the cheaper of the two**, and close a real loop: the DAOs are only ever faked, so the `AUTOINCREMENT` behaviour behind the `DatabaseSeeder` fix was reasoned from documentation and never actually observed against SQLite.
+
+**Skip multi-module and Paging 3.** At 11 screens and seeded data volumes both are structure for its own sake, and a thoughtful reviewer may read them as cargo-culting.
+
 **One adapter is still deliberately inert.** An audit in #16 found five adapters with no click handling; three were fixed by Category Detail and the Reports legend followed in #17. The remaining one:
 
 - **`CardCarouselAdapter`** (Wallet payment cards). Needs its own answer — probably a card-filtered transaction list — which is a separate destination and a separate decision.
@@ -64,8 +91,8 @@ The pure-object route (`BillBuckets`, `MonthlyTotals`, `MonthRange`, `CalendarMo
 
 Open threads, in the order they'd most likely matter — none of these has been agreed, so **ask before starting any of them**:
 
-- **The seeded database is the only data source.** There is no import, no export and no backup, and a schema change wipes everything by design.
-- **9 adapters call `notifyDataSetChanged()`**, rebinding everything on any change. Invisible at current data volumes and *not* worth pre-emptively fixing; it would start to matter in the hundreds of rows. Data access itself is in good shape — every transaction query is bounded by date range or status, and nothing loads transactions unbounded.
+- ~~The seeded database is the only data source.~~ **Deliberately not a gap** — see the portfolio note at the top. Do not propose import, export or backup.
+- **9 adapters call `notifyDataSetChanged()`**, and 0 use `ListAdapter`/`DiffUtil`. At these data volumes that is invisible, and the data layer is in good shape — every transaction query is bounded by date range or status. **The only reason to convert is interviewer signal**, and it is not cheap: two adapters hold extra state (`CalendarDayAdapter`'s selected day, `LegendAdapter`'s total) where a naive conversion silently stops rebinding. The user was offered skip / convert-one / convert-all on 2026-09-10 and had not chosen when the session paused.
 - Smaller deferrals live in each spec's "Explicitly Out of Scope" section — chart interaction, custom date ranges, report export, locale-aware week start.
 
 ### If a new sub-project is agreed

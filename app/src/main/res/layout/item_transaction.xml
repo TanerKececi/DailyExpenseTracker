@@ -18,6 +18,7 @@
 
         <ImageView
             android:id="@+id/ivIcon"
+            android:contentDescription="@null"
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:layout_gravity="center"
