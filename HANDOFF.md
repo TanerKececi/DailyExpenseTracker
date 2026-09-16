@@ -5,9 +5,9 @@ Read this first in a new session. It gets you from zero to "ready to implement" 
 ## Where things stand
 
 - **Repo:** `C:\Users\Administrator\AndroidStudioProjects\DailyExpenseTracker`, GitHub remote `origin` → `https://github.com/TanerKececi/DailyExpenseTracker.git`, default branch `master`.
-- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), **Settings** ([PR #11](https://github.com/TanerKececi/DailyExpenseTracker/pull/11)) and **dark mode** ([PR #13](https://github.com/TanerKececi/DailyExpenseTracker/pull/13)) on 2026-09-05, then **Category Detail** ([PR #16](https://github.com/TanerKececi/DailyExpenseTracker/pull/16)) on 2026-09-09. The repo also has a **README with screenshots** (#14) and **CI** (#15).
+- **Shipped:** Phase 1 (app foundation + Home/Wallet/Categories/Add-Transaction), all of Phase 2 — **Bills** ([PR #1](https://github.com/TanerKececi/DailyExpenseTracker/pull/1)), **Calendar** ([PR #3](https://github.com/TanerKececi/DailyExpenseTracker/pull/3)), **Reports** ([PR #5](https://github.com/TanerKececi/DailyExpenseTracker/pull/5)) — and two follow-on features: **edit/delete transactions** ([PR #7](https://github.com/TanerKececi/DailyExpenseTracker/pull/7)) and **creating scheduled bills** ([PR #8](https://github.com/TanerKececi/DailyExpenseTracker/pull/8)). All merged 2026-09-04. Then **direct ViewModel tests** ([PR #10](https://github.com/TanerKececi/DailyExpenseTracker/pull/10)), **Settings** ([PR #11](https://github.com/TanerKececi/DailyExpenseTracker/pull/11)) and **dark mode** ([PR #13](https://github.com/TanerKececi/DailyExpenseTracker/pull/13)) on 2026-09-05, then **Category Detail** ([PR #16](https://github.com/TanerKececi/DailyExpenseTracker/pull/16)) on 2026-09-09, a **tappable Reports legend** ([PR #17](https://github.com/TanerKececi/DailyExpenseTracker/pull/17)), **decorative category icons** ([PR #18](https://github.com/TanerKececi/DailyExpenseTracker/pull/18)) on 2026-09-16, and **instrumented Room tests** (#19). The repo also has a **README with screenshots** (#14) and **CI** (#15).
 - **Phase 2 is complete.** Auth was the planned fourth sub-project; the user **dropped it from scope entirely on 2026-09-04** — do not propose it again.
-- **In flight (2026-09-11):** branch `polish/accessibility`, **one commit, unpushed, unverified** — the five category icons marked `android:contentDescription="@null"`. Nothing has been built since that commit, so run `./gradlew installDebug testDebugUnitTest lintDebug` before trusting it. Expect 138/138 tests unchanged and lint warnings **59 → 54**.
+- **Nothing is in flight.** `master` has everything. Lint sits at **0 errors, 54 warnings**, unit tests at **138/138 across 21 suites**, instrumented tests at **5/5**.
 - **Open decision:** whether to convert the 9 adapters to `ListAdapter`/`DiffUtil`. See "What's left".
 
 ## This is a portfolio project, not a product
@@ -59,12 +59,19 @@ Audited 2026-09-11. The app demonstrates architecture, testing, theming and cust
 | Gap | State | Why it matters |
 |---|---|---|
 | ~~Jetpack Compose~~ | zero — entirely View system | **Ruled out by the user on 2026-09-11. Do not propose it again.** It was recommended twice as the biggest gap; the user declined. The app stays View-system. |
-| **Networking** | zero — no `INTERNET` permission, no HTTP client | A whole discipline is invisible: DTO↔domain mapping, loading/error state, retry, Room as single source of truth. |
-| **Instrumented tests** | 1 file (the template); all 138 real tests are JVM | The DAOs are only ever faked. In-memory Room tests would verify the real queries — including the `AUTOINCREMENT` behaviour the seeder fix was reasoned from but never actually observed. |
+| ~~Networking~~ | zero — no `INTERNET` permission, no HTTP client | **Ruled out by the user on 2026-09-16. Do not propose it again.** It was recommended as the largest gap once Compose was declined; the user declined it too. Live exchange rates off the currency setting was the specific pitch — it is closed, along with Retrofit/OkHttp/Ktor and any remote data source. |
+| ~~Instrumented tests~~ | **closed** — 5 real tests in `app/src/androidTest/` | Was 1 template file. `AppDatabaseTest` now runs the DAOs against real SQLite. |
 
-**With Compose ruled out, networking is the largest remaining gap.** It has a natural hook that is not contrived: the app already has a currency setting, so live exchange rates with a Room-cached offline fallback exercise the whole stack — HTTP client, DTO↔domain mapping, loading and error state, retry, and Room as single source of truth. It would also be the app's first production dependency since Phase 1, which is a decision for the user, not an assumption.
+**All three capability gaps are now closed or ruled out, and there is no fourth.** Compose and networking were declined; instrumented tests shipped. Treat the app as feature-complete — the remaining items below are decisions to *stop*, not work to pick up.
 
-**Instrumented Room tests are the cheaper of the two**, and close a real loop: the DAOs are only ever faked, so the `AUTOINCREMENT` behaviour behind the `DatabaseSeeder` fix was reasoned from documentation and never actually observed against SQLite.
+**`AppDatabaseTest` (#19) is the instrumented suite.** Five tests on an in-memory `AppDatabase` built directly with `Room.inMemoryDatabaseBuilder` — no Hilt test infrastructure, since the DAOs are what is under test. It added **no dependencies**: `androidx-junit` and `espresso-core` were already on `androidTestImplementation`, and `runBlocking` avoids pulling `kotlinx-coroutines-test` into the source set.
+
+Two results worth keeping, because both were previously only assumed:
+
+- **Room does enable the `foreign_keys` pragma.** An orphan insert is genuinely rejected, so the `DatabaseSeeder` reasoning rests on a real constraint.
+- **The reseed loop works.** `DataResetRepositoryImpl.resetToSeed()` runs twice in one test, confirming ids are reassigned and every transaction still resolves — the `AUTOINCREMENT` behaviour the seeder fix was reasoned from and, until now, never observed.
+
+**These do not run in CI, by decision.** GitHub runners have no emulator, and adding `reactivecircus/android-emulator-runner` was declined as too slow and flaky for the value. Their absence from `ci.yml` is deliberate — do not "fix" it. Run them locally with `./gradlew connectedDebugAndroidTest` against a running emulator.
 
 **Skip multi-module and Paging 3.** At 11 screens and seeded data volumes both are structure for its own sake, and a thoughtful reviewer may read them as cargo-culting.
 
@@ -176,4 +183,5 @@ Read that slice raw rather than grepping it — the log wraps at the PowerShell 
 1. Watcher-driven `installDebug` after every save; poll with the settle-check above.
 2. adb-driven walkthrough with screenshots + `logcat -d | grep "FATAL EXCEPTION"` after each meaningful change. Screenshots and `uiautomator` dumps go in the scratchpad, **not** the repo root.
 3. `testDebugUnitTest lintDebug` once at the end — one request to the user, then read the reports yourself.
-4. Commit per task boundary. Push the feature branch and open a PR only after explicit user confirmation.
+4. **Touching `app/src/androidTest/` or anything under `data/local/`?** Also ask for `connectedDebugAndroidTest` with an emulator running, and read `app/build/outputs/androidTest-results/connected/**/*.xml`. Note the watcher cannot catch these: `installDebug` never compiles the `androidTest` source set, so it reports `SUCCESS` even when an instrumented test does not compile.
+5. Commit per task boundary. Push the feature branch and open a PR only after explicit user confirmation.
