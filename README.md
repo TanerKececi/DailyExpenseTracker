@@ -68,13 +68,14 @@ refreshes every screen observing it without manual invalidation.
 | Navigation | Navigation Component 2.8.4 with Safe Args |
 | UI | View system, ViewBinding + DataBinding, Material 3 |
 | Build | AGP 8.13.2, Gradle version catalog, `compileSdk` 36, `minSdk` 24 |
-| Testing | JUnit 4, `kotlinx-coroutines-test` |
+| Testing | JUnit 4, `kotlinx-coroutines-test`, AndroidX Test (instrumented) |
 
 ## Testing
 
-**129 unit tests across 20 suites**, all passing, alongside a clean `lintDebug` (0 errors).
+**138 unit tests across 21 suites** plus **5 instrumented tests**, all passing, alongside a clean
+`lintDebug` (0 errors).
 
-Two complementary strategies:
+Three complementary strategies:
 
 - **Decision logic lives in pure objects** that take their inputs as parameters, so they test on the
   JVM with no framework at all — `BillBuckets` (which bill belongs in which tab), `CalendarMonth`
@@ -82,10 +83,20 @@ Two complementary strategies:
 - **Every ViewModel is tested directly against its `StateFlow`**, using fake repositories and a
   main-dispatcher rule. This is what catches wiring bugs the pure functions cannot see — a tab
   desynchronising from retained state, or an edit silently dropping a field it never displayed.
+- **The DAOs are tested against real SQLite**, on an in-memory Room database. The JVM suites fake
+  them, so the actual SQL was never executed — these pin what a fake cannot exhibit: that
+  `AUTOINCREMENT` does not reuse an id after a delete (which is why the seeder reads back the ids
+  Room assigned rather than hardcoding them), that the foreign key really does reject an orphan,
+  that `BETWEEN` includes both endpoints, and that `SUM` over an empty range returns `null` rather
+  than `0`.
 
 ```bash
 ./gradlew testDebugUnitTest lintDebug
+./gradlew connectedDebugAndroidTest   # needs a running emulator
 ```
+
+CI runs the first line on every pull request. The instrumented tests are local-only: a hosted
+runner has no emulator, and spinning one up costs minutes per run for five tests.
 
 ## Engineering notes
 
